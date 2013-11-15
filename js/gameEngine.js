@@ -685,14 +685,14 @@ function scene1() {
         }
         
         // CAMERA ////////////////////////////
-        if (boxman.x >= 160 && boxman.x < 578) { // 160 = 176 - 16
+        if (boxman.x > 160 && boxman.x <= 576) { // 160 = 352/2 - 16
             if (boxman.x-vx !== 160) {
                 var bezaX = boxman.x-vx - 160;
                 vx += bezaX;
             }
         }
         
-        if (boxman.y >= 96 && boxman.y < 482) {
+        if (boxman.y > 96 && boxman.y <= 480) {
             if (boxman.y-vy !== 96) {
                 var bezaY = boxman.y-vy - 96;
                 vy += bezaY;
