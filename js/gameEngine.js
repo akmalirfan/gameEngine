@@ -3,6 +3,13 @@ var interval = 1000 / 60,
     tileWidth = 32,
     tileHeight = 32,
     tileNo,
+    
+    // Untuk resize canvas
+    resizeCanvas = true,
+    initWidth = 352,
+    initHeight = 224,
+    scale = 1,
+    
     vx = 0,
     vy = 0,
     left = false,
@@ -389,14 +396,14 @@ function tulis(text, player, player_x, player_y, NPC) {
         }
         
         // ketengahkan kamera ke character yang bercakap
-        if (ygbercakap.x - vx + 16 > game_canvas.width / 2) {
-            if (ygbercakap.x - vx + 20 > game_canvas.width / 2) { //16 + 4 = 20
+        if (ygbercakap.x - vx + 16 > initWidth / 2) {
+            if (ygbercakap.x - vx + 20 > initWidth / 2) { //16 + 4 = 20
                 if (vx + 4 <= 416) vx += 4; // 24tiles * 32px = 768
             } else {
-                if (vx + 1 <= 416) vx += 1; // 768 - game_canvas.width
+                if (vx + 1 <= 416) vx += 1; // 768 - initWidth
             }
-        } else if (ygbercakap.x - vx + 16 < game_canvas.width / 2) {
-            if (ygbercakap.x - vx + 12 < game_canvas.width / 2) { //16 - 4 = 12
+        } else if (ygbercakap.x - vx + 16 < initWidth / 2) {
+            if (ygbercakap.x - vx + 12 < initWidth / 2) { //16 - 4 = 12
                 if (vx - 4 >= 0) vx -= 4;
             } else {
                 if (vx - 1 >= 0) vx -= 1;
@@ -408,10 +415,37 @@ function tulis(text, player, player_x, player_y, NPC) {
 function gameLoop() {
     'use strict';
     
+    if (resizeCanvas) {
+        if (window.innerHeight < window.innerWidth) {
+            scale = Math.floor(window.innerHeight / initHeight);
+        } else {
+            scale = Math.floor(window.innerWidth / initWidth);
+        }
+        
+        canvas.width = initWidth * scale;
+        canvas.height = initHeight * scale;
+        
+        console.log(canvas.width + "x" + canvas.height);
+        
+        // Ketengahkan canvas
+        canvas.style.left = window.innerWidth / 2 - canvas.width / 2 + 'px';
+        canvas.style.top = window.innerHeight / 2 - canvas.height / 2 + 'px';
+        
+        ctx.imageSmoothingEnabled = false;
+        ctx.mozImageSmoothingEnabled = false;
+        ctx.oImageSmoothingEnabled = false;
+        ctx.webkitImageSmoothingEnabled = false;
+        ctx.msImageSmoothingEnabled = false;
+        
+        ctx.scale(scale, scale);
+        
+        resizeCanvas = false;
+    }
+    
     setTimeout(function() {
         window.requestAnimationFrame(gameLoop);
     }, interval);
-    ctx.clearRect(0, 0, 352, 224);
+    ctx.clearRect(0, 0, initWidth, initHeight);
 
     // Scenes
     switch (currentScene) {
@@ -422,7 +456,7 @@ function gameLoop() {
             inventory();
             break;
     }
-};
+}
 
 function scene1() {
     'use strict';
@@ -804,6 +838,10 @@ document.addEventListener('keyup', function (event) {
             dahlepas_inv = true;
             break;
     }
+});
+
+document.addEventListener('resize', function() {
+    resizeCanvas = true;
 });
 
 currentScene = 1;
