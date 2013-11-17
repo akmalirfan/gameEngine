@@ -840,9 +840,10 @@ document.addEventListener('keyup', function (event) {
     }
 });
 
-document.addEventListener('resize', function() {
+window.addEventListener('resize', function() {
+    console.log("asdasd");
     resizeCanvas = true;
-});
+}, false);
 
 currentScene = 1;
 gameLoop();
