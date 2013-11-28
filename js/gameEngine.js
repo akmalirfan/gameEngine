@@ -10,6 +10,9 @@ var interval = 1000 / 60,
     initHeight = 224,
     scale = 1,
     
+    box_x,
+    box_y,
+    
     vx = 0,
     vy = 0,
     left = false,
@@ -23,11 +26,11 @@ var interval = 1000 / 60,
     // Barang-barang dalam inventory
     tangga = new Image(),
     
+    unlock = false,
+    
     currentScene = 1,
     dah_init = false,
     
-    dahlepas_L = true,
-    dahlepas_R = true,
     dahlepas_space = true, //untuk space
     dahlepas_inv = true,
     //NPC,
@@ -149,32 +152,62 @@ tangga.src = "./images/tangga.png";
 
 // Insert polyfill here
 
-tileNo = [
-    [2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-    [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2],
-    [2, 1, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-    [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,12,12,12,12,12, 2, 2, 2, 2, 2],
-    [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,12,12,12,12,12, 2, 2, 2, 2, 2],
-    [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,12,12,12,12,12, 2, 2, 2, 2, 2],
-    [2, 2, 1, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2,12,12,12,12,12, 2, 2, 2, 2, 2],
-    [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 0, 2, 2, 2, 2, 1, 2, 2],
-    [2, 2, 3, 4, 4, 4, 5, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2],
-    [2, 2, 6, 7, 7, 7, 8, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-    [2, 2, 6, 7, 7, 7, 8, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-    [2, 2, 6, 7, 7, 7, 8, 2, 2, 2, 1, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2],
-    [2, 2, 9,10,10,10,11, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2],
-    [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-    [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-    [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-    [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-    [2, 1, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2],
-    [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
-];
+tileNo =
+    [
+        [
+            [2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+            [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2],
+            [2, 1, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+            [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,12,12,12,12,12, 2, 2, 2, 2, 2],
+            [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,12,12,12,12,12, 2, 2, 2, 2, 2],
+            [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,12,12,12,12,12, 2, 2, 2, 2, 2],
+            [2, 2, 1, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2,12,12,12,12,12, 2, 2, 2, 2, 2],
+            [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 0, 2, 2, 2, 2, 1, 2, 2],
+            [2, 2, 3, 4, 4, 4, 5, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2],
+            [2, 2, 6, 7, 7, 7, 8, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+            [2, 2, 6, 7, 7, 7, 8, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+            [2, 2, 6, 7, 7, 7, 8, 2, 2, 2, 1, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2],
+            [2, 2, 9,10,10,10,11, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2],
+            [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+            [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+            [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+            [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+            [2, 1, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2],
+            [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
+        ],
+        [
+            [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+            [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+            [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+            [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+            [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+            [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+            [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
+        ]
+    ];
+
+// Function untuk lukis tiles
+function drawTiles() {
+    for (var i = 0, tileNo0_l = tileNo[currentScene-1][0].length; i < tileNo0_l; i++) {
+        for (var j = 0, tileNo_l = tileNo[currentScene-1].length; j < tileNo_l; j++) {
+            ctx.drawImage(
+                tile,
+                0,
+                tileNo[currentScene-1][j][i] * tileHeight,
+                tileWidth,
+                tileHeight,
+                i * tileWidth - vx,
+                j * tileHeight - vy,
+                tileWidth,
+                tileHeight);
+        }
+    }
+}
 
 // Function untuk draw watak ikut depth
 function drawCharacters() {
     'use strict';
-    var entArray_length = entArray.length;
+    //var entArray_length = entArray.length;
     
     /* Susun entities ikut depth */
     entArray.sort(function(a, b) {
@@ -182,7 +215,7 @@ function drawCharacters() {
     });
     
     /* Lukis ikut turutan */
-    for (var i = 0; i < entArray_length; i++) {
+    /*for (var i = 0; i < entArray_length; i++) {
         if (entArray[i].x-vx >= -32
             && entArray[i].x-vx < game_canvas.width
             && entArray[i].y-vy >= -32
@@ -191,6 +224,170 @@ function drawCharacters() {
             entArray[i].draw();
         } else {
             entArray[i].inView = false;
+        }
+    }*/
+    for (var ent in entArray) {
+        if (entArray[ent] !== undefined) { // coba
+            if (entArray[ent].x-vx >= -32
+                && entArray[ent].x-vx < game_canvas.width
+                && entArray[ent].y-vy >= -32
+                && entArray[ent].y-vy < game_canvas.height) {
+                entArray[ent].inView = true;
+                entArray[ent].draw();
+            } else {
+                entArray[ent].inView = false;
+            }
+        } // coba
+    }
+}
+
+function movements() {
+    // If alligned to grid
+    if (boxman.x % 32 === 0 && boxman.y % 32 === 0) {
+        alligned = true;
+        
+        if (!up && !down) { // disable diagonal movements
+            if (left) {
+                boxman.hspeed = -2;
+                boxman.arah = 1;
+            }
+            if (right) {
+                boxman.hspeed = 2;
+                boxman.arah = 0;
+            }
+        }
+        
+        if (!left && !right) { // disable diagonal movements
+            if (up) boxman.vspeed = -2;
+            if (down) boxman.vspeed = 2;
+        }
+        
+        if (!left && !right) boxman.hspeed = 0;
+        if (!up && !down) boxman.vspeed = 0;
+        
+        if (dahlepas_inv && inv) {
+            currentScene = 5;
+            dahlepas_inv = false;
+        }
+    } else {
+        alligned = false;
+    }
+}
+
+// Gerakkan boxman dan crate
+function motion() {
+    if (boxman.hspeed > 0) {
+        if (!collisionR) {
+            if (crate.x === boxman.x + 32 && crate.y === boxman.y) {
+                if (!collisionR2) boxman.x += boxman.hspeed / 2;
+            } else {
+                boxman.x += boxman.hspeed;
+            }
+        }
+        
+        if (!collisionR2
+            && crate.can_interact
+            && crate.x > boxman.x
+            && crate.x + boxman.hspeed > boxman.x) crate.x += boxman.hspeed / 2;
+    } else if (boxman.hspeed < 0) {
+        if (!collisionL) {
+            if (crate.x === boxman.x - 32 && crate.y === boxman.y) {
+                if (!collisionL2) boxman.x += boxman.hspeed / 2;
+            } else {
+                boxman.x += boxman.hspeed;
+            }
+        }
+        if (!collisionL2
+            && crate.can_interact
+            && crate.x < boxman.x
+            && crate.x + boxman.hspeed < boxman.x) crate.x += boxman.hspeed / 2;
+    }
+    //////////////////////////////////////////
+    if (boxman.vspeed > 0) {
+        if (!collisionD) {
+            if (crate.y === boxman.y + 32 && crate.x === boxman.x) {
+                if (!collisionD2) boxman.y += boxman.vspeed / 2;
+            } else {
+                boxman.y += boxman.vspeed;
+            }
+        }
+        if (!collisionD2
+            && crate.can_interact
+            && crate.y > boxman.y
+            && crate.y + boxman.vspeed > boxman.y) crate.y += boxman.vspeed / 2;
+    } else if (boxman.vspeed < 0) {
+        if (!collisionU) {
+            if (crate.y === boxman.y - 32 && crate.x === boxman.x) {
+                if (!collisionU2) boxman.y += boxman.vspeed / 2;
+            } else {
+                boxman.y += boxman.vspeed;
+            }
+        }
+        if (!collisionU2
+            && crate.can_interact
+            && crate.y < boxman.y
+            && crate.y + boxman.vspeed < boxman.y) crate.y += boxman.vspeed / 2;
+    }
+}
+
+//Animasi untuk boxman
+function boxmanAnimate(box_x, box_y) {
+    if (box_x !== boxman.x || box_y !== boxman.y) { // Kalau kedudukan berubah
+        if (boxman.limiter === 0) {
+            boxman.frame_index = 4 * boxman.arah + (boxman.frame_index + 1) % 4;
+        }
+        boxman.limiter = (boxman.limiter + 1) % 4;
+    } else {
+        boxman.frame_index = 0 + 4 * boxman.arah;
+    }
+}
+
+function collisionCheck(box_x, box_y) {
+    for (var ent in entArray2) {
+        // Uji jarak boleh bercakap
+        if (((boxman.x === entArray2[ent].x-32 || boxman.x === entArray2[ent].x+32)
+            && (boxman.y === entArray2[ent].y))
+            || ((boxman.x === entArray2[ent].x)
+            && (boxman.y === entArray2[ent].y-32 || boxman.y === entArray2[ent].y+32))) {
+            entArray2[ent].can_interact = true;
+            if (entArray2[ent] !== crate) // coba
+                enpisi = entArray2[ent];
+            if (enpisi !== undefined && enpisi.textID !== null) {
+                tulis(
+                    text[enpisi.textID][enpisi.text],
+                    boxman,
+                    box_x,
+                    box_y,
+                    enpisi);
+            }
+        } else {
+            entArray2[ent].can_interact = false;
+            entArray2[ent].legap = 0;
+        }
+        
+        // Uji collision
+        if (entArray2[ent].inView && entArray2[ent] !== crate) {
+            if (entArray2[ent].y === boxman.y) {
+                if (entArray2[ent].x === boxman.x - 32) {
+                    collisionL = true;
+                } else if (entArray2[ent].x === boxman.x - 64) {
+                    collisionL2 = true;
+                } else if (entArray2[ent].x === boxman.x + 32) {
+                    collisionR = true;
+                } else if (entArray2[ent].x === boxman.x + 64) {
+                    collisionR2 = true;
+                }
+            } else if (entArray2[ent].x === boxman.x) {
+                if (entArray2[ent].y === boxman.y - 32) {
+                    collisionU = true;
+                } else if (entArray2[ent].y === boxman.y - 64) {
+                    collisionU2 = true;
+                } else if (entArray2[ent].y === boxman.y + 32) {
+                    collisionD = true;
+                } else if (entArray2[ent].y === boxman.y + 64) {
+                    collisionD2 = true;
+                }
+            }
         }
     }
 }
@@ -260,7 +457,6 @@ function tulis(text, player, player_x, player_y, NPC) {
 	if (NPC.legap > 1) NPC.legap = 1; // hadkan nilai legap
     
     if (!sdgcakap) {
-        //if (dahlepas_L && dahlepas_R) {
         if (player.x === player_x && player.y === player_y) { // Kalau kedudukan tak berubah
             ctx.fillStyle = 'rgba(255, 255, 255, ' + NPC.legap + ')';
             if (player.x === NPC.x) {
@@ -452,6 +648,9 @@ function gameLoop() {
         case 1:
             scene1();
             break;
+        case 2:
+            scene2();
+            break;
         case 5:
             inventory();
             break;
@@ -529,25 +728,12 @@ function scene1() {
         dah_init = true;
     }
     
-    /* TILES */
-    for (var i = 0, tileNo0_l = tileNo[0].length; i < tileNo0_l; i++) {
-        for (var j = 0, tileNo_l = tileNo.length; j < tileNo_l; j++) {
-            ctx.drawImage(
-                tile,
-                0,
-                tileNo[j][i] * tileHeight,
-                tileWidth,
-                tileHeight,
-                i * tileWidth - vx,
-                j * tileHeight - vy,
-                tileWidth,
-                tileHeight);
-        }
-    }
-
-    /* Tetapkan depth */
+    drawTiles();
+    
+    // Tetapkan depth
     boxman.depth = -boxman.y;
-    monstak.depth = -monstak.y;
+    if (monstak !== undefined) // coba
+        monstak.depth = -monstak.y;
     boxbiru.depth = -boxbiru.y;
     kk.depth = -kk.y;
     crate.depth = -crate.y;
@@ -559,164 +745,34 @@ function scene1() {
     
     // Tukar frame index monstak berdasarkan
     // kedudukan boxman
-    monstak.frame_index = (boxman.x > monstak.x) ? 0 : 4;
+    if (monstak !== undefined) // coba
+        monstak.frame_index = (boxman.x > monstak.x) ? 0 : 4;
     
     // Tukar frame index kk berdasarkan
     // kedudukan boxman
     kk.frame_index = (boxman.x > kk.x) ? 0 : 1;
     
     if (!sdgcakap) {
-        //Allign to grid
-        if (boxman.x % 32 === 0 && boxman.y % 32 === 0) {
-            alligned = true;
-            
-            if (!up && !down) { // disable diagonal movements
-                if (left) {
-                    boxman.hspeed = -2;
-                    boxman.arah = 1;
-                }
-                if (right) {
-                    boxman.hspeed = 2;
-                    boxman.arah = 0;
-                }
-            }
-            
-            if (!left && !right) { // disable diagonal movements
-                if (up) boxman.vspeed = -2;
-                if (down) boxman.vspeed = 2;
-            }
-            
-            if (!left && !right) boxman.hspeed = 0;
-            if (!up && !down) boxman.vspeed = 0;
-            
-            if (dahlepas_inv && inv) {
-                currentScene = 5;
-                dahlepas_inv = false;
-            }
-        } else {
-            alligned = false;
-        }
+        movements();
         
         // Simpan nilai x dan y
-        var box_x = boxman.x;
-        var box_y = boxman.y;
+        box_x = boxman.x;
+        box_y = boxman.y;
         
         // If alligned to grid
         if (alligned) {
-            //Uji jarak boleh bercakap
-            for (var ent in entArray2) {
-                if (((boxman.x === entArray2[ent].x-32 || boxman.x === entArray2[ent].x+32)
-                    && (boxman.y === entArray2[ent].y))
-                    || ((boxman.x === entArray2[ent].x)
-                    && (boxman.y === entArray2[ent].y-32 || boxman.y === entArray2[ent].y+32))) {
-                    entArray2[ent].can_interact = true;
-                    enpisi = entArray2[ent];
-                    if (enpisi.textID !== null) {
-                        tulis(
-                            text[enpisi.textID][enpisi.text],
-                            boxman,
-                            box_x,
-                            box_y,
-                            enpisi);
-                    }
-                } else {
-                    entArray2[ent].can_interact = false;
-                    entArray2[ent].legap = 0;
-                }
-            }
+            // Uji jarak dan collision
+            collisionCheck(box_x, box_y);
             
-            // Uji collision
-            var entArray2_length = entArray2.length;
-            for (var i = 0; i < entArray2_length; i++) {
-                if (entArray2[i].inView && entArray2[i] !== crate) {
-                    if (entArray2[i].y === boxman.y) {
-                        if (entArray2[i].x === boxman.x - 32) {
-                            collisionL = true;
-                        } else if (entArray2[i].x === boxman.x - 64) {
-                            collisionL2 = true;
-                        } else if (entArray2[i].x === boxman.x + 32) {
-                            collisionR = true;
-                        } else if (entArray2[i].x === boxman.x + 64) {
-                            collisionR2 = true;
-                        }
-                    } else if (entArray2[i].x === boxman.x) {
-                        if (entArray2[i].y === boxman.y - 32) {
-                            collisionU = true;
-                        } else if (entArray2[i].y === boxman.y - 64) {
-                            collisionU2 = true;
-                        } else if (entArray2[i].y === boxman.y + 32) {
-                            collisionD = true;
-                        } else if (entArray2[i].y === boxman.y + 64) {
-                            collisionD2 = true;
-                        }
-                    }
-                }
+            if (crate.x === 32 && crate.y === 32) {
+                unlock = (!unlock) ? true : false;
             }
         }
         
         // Gerakkan boxman dan crate
-        if (boxman.hspeed > 0) {
-            if (!collisionR) {
-                if (crate.x === boxman.x + 32 && crate.y === boxman.y) {
-                    if (!collisionR2) boxman.x += boxman.hspeed / 2;
-                } else {
-                    boxman.x += boxman.hspeed;
-                }
-            }
-            
-            if (!collisionR2
-                && crate.can_interact
-                && crate.x > boxman.x
-                && crate.x + boxman.hspeed > boxman.x) crate.x += boxman.hspeed / 2;
-        } else if (boxman.hspeed < 0) {
-            if (!collisionL) {
-                if (crate.x === boxman.x - 32 && crate.y === boxman.y) {
-                    if (!collisionL2) boxman.x += boxman.hspeed / 2;
-                } else {
-                    boxman.x += boxman.hspeed;
-                }
-            }
-            if (!collisionL2
-                && crate.can_interact
-                && crate.x < boxman.x
-                && crate.x + boxman.hspeed < boxman.x) crate.x += boxman.hspeed / 2;
-        }
-        //////////////////////////////////////////
-        if (boxman.vspeed > 0) {
-            if (!collisionD) {
-                if (crate.y === boxman.y + 32 && crate.x === boxman.x) {
-                    if (!collisionD2) boxman.y += boxman.vspeed / 2;
-                } else {
-                    boxman.y += boxman.vspeed;
-                }
-            }
-            if (!collisionD2
-                && crate.can_interact
-                && crate.y > boxman.y
-                && crate.y + boxman.vspeed > boxman.y) crate.y += boxman.vspeed / 2;
-        } else if (boxman.vspeed < 0) {
-            if (!collisionU) {
-                if (crate.y === boxman.y - 32 && crate.x === boxman.x) {
-                    if (!collisionU2) boxman.y += boxman.vspeed / 2;
-                } else {
-                    boxman.y += boxman.vspeed;
-                }
-            }
-            if (!collisionU2
-                && crate.can_interact
-                && crate.y < boxman.y
-                && crate.y + boxman.vspeed < boxman.y) crate.y += boxman.vspeed / 2;
-        }
+        motion();
         
-        //Animasi untuk boxman
-        if (box_x !== boxman.x || box_y !== boxman.y) { // Kalau kedudukan berubah
-            if (boxman.limiter === 0) {
-                boxman.frame_index = 4 * boxman.arah + (boxman.frame_index + 1) % 4;
-            }
-            boxman.limiter = (boxman.limiter + 1) % 4;
-        } else {
-            boxman.frame_index = 0 + 4 * boxman.arah;
-        }
+        boxmanAnimate(box_x, box_y);
         
         // CAMERA ////////////////////////////
         if (boxman.x > 160 && boxman.x <= 576) { // 160 = 352/2 - 16
@@ -742,6 +798,56 @@ function scene1() {
             enpisi);
     }
 } //scene1
+
+function scene2() {
+    'use strict';
+    
+    collisionL = false;
+    collisionR = false;
+    collisionD = false;
+    collisionU = false;
+    
+    collisionL2 = false;
+    collisionR2 = false;
+    collisionD2 = false;
+    collisionU2 = false;
+    
+    if (!dah_init) {
+        // Initialization
+        boxman.x = 160;
+        boxman.y = 96;
+        
+        crate.x = 128;
+        crate.y = 128;
+        
+        dah_init = true;
+    }
+    
+    drawTiles();
+    
+    // Tetapkan depth
+    boxman.depth = -boxman.y;
+    crate.depth = -crate.y;
+
+    // Draw watak ikut depth
+    drawCharacters();
+    
+    movements();
+    
+    // Simpan nilai x dan y
+    box_x = boxman.x;
+    box_y = boxman.y;
+    
+    // If alligned to grid
+    if (alligned) {
+        collisionCheck(box_x, box_y);
+    }
+    
+    // Gerakkan boxman dan crate
+    motion();
+    
+    boxmanAnimate(box_x, box_y);
+} //scene2
 
 function inventory() {
     'use strict';
@@ -770,7 +876,7 @@ document.addEventListener('keydown', function (event) {
             
             // If allined to grid
             if (alligned) {
-                if (enpisi !== null && enpisi.can_interact && dahlepas_space) {
+                if (enpisi !== undefined && enpisi.can_interact && dahlepas_space) {
                     if (var_panjang[1] === panjang_teks) {
                         // Kosongkan var_panjang
                         var_panjang = [0,0];
@@ -792,14 +898,12 @@ document.addEventListener('keydown', function (event) {
             break;
         case 37:
             left = true;
-            dahlepas_L = false;
             break;
         case 38:
             up = true;
             break;
         case 39:
             right = true;
-            dahlepas_R = false;
             break;
         case 40:
             down = true;
@@ -815,20 +919,15 @@ document.addEventListener('keyup', function (event) {
         case 32:
             space = false;
             dahlepas_space = true;
-            
-            //if (!sdgcakap) enpisi = null;
-            
             break;
         case 37:
             left = false;
-            dahlepas_L = true;
             break;
         case 38:
             up = false;
             break;
         case 39:
             right = false;
-            dahlepas_R = true;
             break;
         case 40:
             down = false;
@@ -841,7 +940,6 @@ document.addEventListener('keyup', function (event) {
 });
 
 window.addEventListener('resize', function() {
-    console.log("asdasd");
     resizeCanvas = true;
 }, false);
 
