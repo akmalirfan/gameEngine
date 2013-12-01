@@ -15,6 +15,9 @@ var interval = 1000 / 60,
     
     vx = 0,
     vy = 0,
+    
+    bezaX,
+    bezaY,
     left = false,
     right = false,
     up = false,
@@ -28,7 +31,8 @@ var interval = 1000 / 60,
     
     unlock = false,
     
-    currentScene = 1,
+    // Berkaitan dengan scene
+    currentScene,
     dah_init = false,
     
     dahlepas_space = true, //untuk space
@@ -74,7 +78,7 @@ function Character(img_src, textID) {
     this.y;
     this.hspeed = 0;
     this.vspeed = 0;
-    this.arah = 0; // 0(kanan) 1(kiri) nak guna tribool?
+    this.arah = 0; // 0(kanan) 1(kiri) >> nak guna tribool?
     this.frame_index = 0;
     this.limiter = 0;
     this.depth = 0;
@@ -133,7 +137,7 @@ var entArray = [
     invWalls15 = new Character(null, null),
     invWalls16 = new Character(null, null),
     
-    // NPC
+    // NPCs
     monstak = new Character("./images/monsta.png", 0),
     boxbiru = new Character("./images/npc_biru.png", 1),
     kk = new Character("./images/kk.png", 2),
@@ -186,14 +190,121 @@ tileNo =
         ]
     ];
 
+// Function untuk pergi ke scene lain
+function gotoScene(scene) { // coba
+    currentScene = scene;
+    
+    enpisi = undefined;
+    
+    // View kat tempat yang betul
+    vx = 0;
+    vy = 0;
+    
+    entArray = []; // Kosongkan
+    
+    if (scene === 0) {
+        entArray = [
+            boxman,
+            invWalls1,
+            invWalls2,
+            invWalls3,
+            invWalls4,
+            invWalls5,
+            invWalls6,
+            invWalls7,
+            invWalls8,
+            invWalls9,
+            invWalls10,
+            invWalls11,
+            invWalls12,
+            invWalls13,
+            invWalls14,
+            invWalls15,
+            invWalls16,
+            monstak,
+            boxbiru,
+            kk,
+            crate
+        ];
+        
+        entArray2 = entArray.slice(1);
+        
+        boxman.x = 160;
+        boxman.y = 96;
+        
+        monstak.x = 224;
+        monstak.y = 96;
+        
+        boxbiru.x = 224;
+        boxbiru.y = 256;
+        
+        kk.x = 512;
+        kk.y = 128;
+        
+        crate.x = 128;
+        crate.y = 128;
+        
+        // Invisible walls
+        invWalls1.x = 64;
+        invWalls1.y = 256;
+        invWalls2.x = 96;
+        invWalls2.y = 256;
+        invWalls3.x = 128;
+        invWalls3.y = 256;
+        invWalls4.x = 160;
+        invWalls4.y = 256;
+        invWalls5.x = 192;
+        invWalls5.y = 256;
+        
+        invWalls6.x = 64;
+        invWalls6.y = 288;
+        invWalls7.x = 192;
+        invWalls7.y = 288;
+        
+        invWalls8.x = 64;
+        invWalls8.y = 320;
+        invWalls9.x = 192;
+        invWalls9.y = 320;
+        
+        invWalls10.x = 64;
+        invWalls10.y = 352;
+        invWalls11.x = 192;
+        invWalls11.y = 352;
+        
+        invWalls12.x = 64;
+        invWalls12.y = 384;
+        invWalls13.x = 96;
+        invWalls13.y = 384;
+        invWalls14.x = 128;
+        invWalls14.y = 384;
+        invWalls15.x = 160;
+        invWalls15.y = 384;
+        invWalls16.x = 192;
+        invWalls16.y = 384;
+    } else if (scene === 1) {
+        entArray = [
+            boxman,
+            crate
+        ];
+        
+        entArray2 = entArray.slice(1);
+        
+        boxman.x = 160;
+        boxman.y = 96;
+        
+        crate.x = 128;
+        crate.y = 128;
+    }
+} // coba
+
 // Function untuk lukis tiles
 function drawTiles() {
-    for (var i = 0, tileNo0_l = tileNo[currentScene-1][0].length; i < tileNo0_l; i++) {
-        for (var j = 0, tileNo_l = tileNo[currentScene-1].length; j < tileNo_l; j++) {
+    for (var i = 0, tileNo0_l = tileNo[currentScene][0].length; i < tileNo0_l; i++) {
+        for (var j = 0, tileNo_l = tileNo[currentScene].length; j < tileNo_l; j++) {
             ctx.drawImage(
                 tile,
                 0,
-                tileNo[currentScene-1][j][i] * tileHeight,
+                tileNo[currentScene][j][i] * tileHeight,
                 tileWidth,
                 tileHeight,
                 i * tileWidth - vx,
@@ -207,7 +318,7 @@ function drawTiles() {
 // Function untuk draw watak ikut depth
 function drawCharacters() {
     'use strict';
-    //var entArray_length = entArray.length;
+    var entArray_length = entArray.length;
     
     /* Susun entities ikut depth */
     entArray.sort(function(a, b) {
@@ -215,27 +326,16 @@ function drawCharacters() {
     });
     
     /* Lukis ikut turutan */
-    /*for (var i = 0; i < entArray_length; i++) {
-        if (entArray[i].x-vx >= -32
-            && entArray[i].x-vx < game_canvas.width
-            && entArray[i].y-vy >= -32
-            && entArray[i].y-vy < game_canvas.height) {
-            entArray[i].inView = true;
-            entArray[i].draw();
-        } else {
-            entArray[i].inView = false;
-        }
-    }*/
-    for (var ent in entArray) {
-        if (entArray[ent] !== undefined) { // coba
-            if (entArray[ent].x-vx >= -32
-                && entArray[ent].x-vx < game_canvas.width
-                && entArray[ent].y-vy >= -32
-                && entArray[ent].y-vy < game_canvas.height) {
-                entArray[ent].inView = true;
-                entArray[ent].draw();
+    for (var i = 0; i < entArray_length; i++) {
+        if (entArray[i] !== undefined) { // coba
+            if (entArray[i].x-vx >= -32
+                && entArray[i].x-vx < game_canvas.width
+                && entArray[i].y-vy >= -32
+                && entArray[i].y-vy < game_canvas.height) {
+                entArray[i].inView = true;
+                entArray[i].draw();
             } else {
-                entArray[ent].inView = false;
+                entArray[i].inView = false;
             }
         } // coba
     }
@@ -343,7 +443,8 @@ function boxmanAnimate(box_x, box_y) {
 }
 
 function collisionCheck(box_x, box_y) {
-    for (var ent in entArray2) {
+    var entArray2_length = entArray2.length;
+    for (var ent = 0; ent < entArray2_length; ent++) {
         // Uji jarak boleh bercakap
         if (((boxman.x === entArray2[ent].x-32 || boxman.x === entArray2[ent].x+32)
             && (boxman.y === entArray2[ent].y))
@@ -645,11 +746,11 @@ function gameLoop() {
 
     // Scenes
     switch (currentScene) {
+        case 0:
+            scene0();
+            break;
         case 1:
             scene1();
-            break;
-        case 2:
-            scene2();
             break;
         case 5:
             inventory();
@@ -657,7 +758,7 @@ function gameLoop() {
     }
 }
 
-function scene1() {
+function scene0() {
     'use strict';
     
     collisionL = false;
@@ -671,7 +772,37 @@ function scene1() {
     collisionU2 = false;
     
     if (!dah_init) {
-        // Initialization
+        // View kat tempat yang betul
+        vx = 0;
+        vy = 0;
+        
+        entArray = []; // Kosongkan
+        entArray = [
+            boxman,
+            invWalls1,
+            invWalls2,
+            invWalls3,
+            invWalls4,
+            invWalls5,
+            invWalls6,
+            invWalls7,
+            invWalls8,
+            invWalls9,
+            invWalls10,
+            invWalls11,
+            invWalls12,
+            invWalls13,
+            invWalls14,
+            invWalls15,
+            invWalls16,
+            monstak,
+            boxbiru,
+            kk,
+            crate
+        ];
+        
+        entArray2 = entArray.slice(1);
+        
         boxman.x = 160;
         boxman.y = 96;
         
@@ -765,7 +896,9 @@ function scene1() {
             collisionCheck(box_x, box_y);
             
             if (crate.x === 32 && crate.y === 32) {
-                unlock = (!unlock) ? true : false;
+                unlock = true;
+            } else {
+                unlock = false;
             }
         }
         
@@ -774,19 +907,15 @@ function scene1() {
         
         boxmanAnimate(box_x, box_y);
         
-        // CAMERA ////////////////////////////
-        if (boxman.x > 160 && boxman.x <= 576) { // 160 = 352/2 - 16
-            if (boxman.x-vx !== 160) {
-                var bezaX = boxman.x-vx - 160;
-                vx += bezaX;
-            }
+        // KAMERA ////////////////////////////
+        if (boxman.x >= 160 && boxman.x <= 576) { // 160 = 352/2 - 16
+            bezaX = boxman.x-vx - 160;
+            vx += bezaX;
         }
         
-        if (boxman.y > 96 && boxman.y <= 480) {
-            if (boxman.y-vy !== 96) {
-                var bezaY = boxman.y-vy - 96;
-                vy += bezaY;
-            }
+        if (boxman.y >= 96 && boxman.y <= 480) {
+            bezaY = boxman.y-vy - 96;
+            vy += bezaY;
         }
         ///////////////////////////////////////
     } else if (enpisi.textID !== null) {
@@ -797,9 +926,9 @@ function scene1() {
             box_y,
             enpisi);
     }
-} //scene1
+} //scene0
 
-function scene2() {
+function scene1() {
     'use strict';
     
     collisionL = false;
@@ -813,7 +942,18 @@ function scene2() {
     collisionU2 = false;
     
     if (!dah_init) {
-        // Initialization
+        // View kat tempat yang betul
+        vx = 0;
+        vy = 0;
+        
+        entArray = []; // Kosongkan
+        entArray = [
+            boxman,
+            crate
+        ];
+        
+        entArray2 = entArray.slice(1);
+        
         boxman.x = 160;
         boxman.y = 96;
         
@@ -847,7 +987,7 @@ function scene2() {
     motion();
     
     boxmanAnimate(box_x, box_y);
-} //scene2
+} //scene1
 
 function inventory() {
     'use strict';
@@ -864,7 +1004,7 @@ function inventory() {
     }
     
     if (dahlepas_inv && inv) {
-        currentScene = 1;
+        currentScene = 0;
         dahlepas_inv = false;
     }
 } //inventory
@@ -943,5 +1083,5 @@ window.addEventListener('resize', function() {
     resizeCanvas = true;
 }, false);
 
-currentScene = 1;
+currentScene = 0;
 gameLoop();
