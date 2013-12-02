@@ -33,7 +33,6 @@ var interval = 1000 / 60,
     
     // Berkaitan dengan scene
     currentScene,
-    dah_init = false,
     
     dahlepas_space = true, //untuk space
     dahlepas_inv = true,
@@ -191,7 +190,7 @@ tileNo =
     ];
 
 // Function untuk pergi ke scene lain
-function gotoScene(scene) { // coba
+function gotoScene(scene) {
     currentScene = scene;
     
     enpisi = undefined;
@@ -295,7 +294,7 @@ function gotoScene(scene) { // coba
         crate.x = 128;
         crate.y = 128;
     }
-} // coba
+}
 
 // Function untuk lukis tiles
 function drawTiles() {
@@ -771,94 +770,6 @@ function scene0() {
     collisionD2 = false;
     collisionU2 = false;
     
-    if (!dah_init) {
-        // View kat tempat yang betul
-        vx = 0;
-        vy = 0;
-        
-        entArray = []; // Kosongkan
-        entArray = [
-            boxman,
-            invWalls1,
-            invWalls2,
-            invWalls3,
-            invWalls4,
-            invWalls5,
-            invWalls6,
-            invWalls7,
-            invWalls8,
-            invWalls9,
-            invWalls10,
-            invWalls11,
-            invWalls12,
-            invWalls13,
-            invWalls14,
-            invWalls15,
-            invWalls16,
-            monstak,
-            boxbiru,
-            kk,
-            crate
-        ];
-        
-        entArray2 = entArray.slice(1);
-        
-        boxman.x = 160;
-        boxman.y = 96;
-        
-        monstak.x = 224;
-        monstak.y = 96;
-        
-        boxbiru.x = 224;
-        boxbiru.y = 256;
-        
-        kk.x = 512;
-        kk.y = 128;
-        
-        crate.x = 128;
-        crate.y = 128;
-        
-        // Invisible walls
-        invWalls1.x = 64;
-        invWalls1.y = 256;
-        invWalls2.x = 96;
-        invWalls2.y = 256;
-        invWalls3.x = 128;
-        invWalls3.y = 256;
-        invWalls4.x = 160;
-        invWalls4.y = 256;
-        invWalls5.x = 192;
-        invWalls5.y = 256;
-        
-        invWalls6.x = 64;
-        invWalls6.y = 288;
-        invWalls7.x = 192;
-        invWalls7.y = 288;
-        
-        invWalls8.x = 64;
-        invWalls8.y = 320;
-        invWalls9.x = 192;
-        invWalls9.y = 320;
-        
-        invWalls10.x = 64;
-        invWalls10.y = 352;
-        invWalls11.x = 192;
-        invWalls11.y = 352;
-        
-        invWalls12.x = 64;
-        invWalls12.y = 384;
-        invWalls13.x = 96;
-        invWalls13.y = 384;
-        invWalls14.x = 128;
-        invWalls14.y = 384;
-        invWalls15.x = 160;
-        invWalls15.y = 384;
-        invWalls16.x = 192;
-        invWalls16.y = 384;
-        
-        dah_init = true;
-    }
-    
     drawTiles();
     
     // Tetapkan depth
@@ -940,28 +851,6 @@ function scene1() {
     collisionR2 = false;
     collisionD2 = false;
     collisionU2 = false;
-    
-    if (!dah_init) {
-        // View kat tempat yang betul
-        vx = 0;
-        vy = 0;
-        
-        entArray = []; // Kosongkan
-        entArray = [
-            boxman,
-            crate
-        ];
-        
-        entArray2 = entArray.slice(1);
-        
-        boxman.x = 160;
-        boxman.y = 96;
-        
-        crate.x = 128;
-        crate.y = 128;
-        
-        dah_init = true;
-    }
     
     drawTiles();
     
@@ -1083,5 +972,6 @@ window.addEventListener('resize', function() {
     resizeCanvas = true;
 }, false);
 
-currentScene = 0;
+//currentScene = 0;
+gotoScene(0);
 gameLoop();
