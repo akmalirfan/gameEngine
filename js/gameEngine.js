@@ -191,6 +191,8 @@ tileNo =
 
 // Function untuk pergi ke scene lain
 function gotoScene(scene) {
+    'use strict';
+    
     currentScene = scene;
     
     enpisi = undefined;
@@ -298,6 +300,7 @@ function gotoScene(scene) {
 
 // Function untuk lukis tiles
 function drawTiles() {
+    'use strict';
     for (var i = 0, tileNo0_l = tileNo[currentScene][0].length; i < tileNo0_l; i++) {
         for (var j = 0, tileNo_l = tileNo[currentScene].length; j < tileNo_l; j++) {
             ctx.drawImage(
@@ -341,6 +344,7 @@ function drawCharacters() {
 }
 
 function movements() {
+    'use strict';
     // If alligned to grid
     if (boxman.x % 32 === 0 && boxman.y % 32 === 0) {
         alligned = true;
@@ -375,6 +379,7 @@ function movements() {
 
 // Gerakkan boxman dan crate
 function motion() {
+    'use strict';
     if (boxman.hspeed > 0) {
         if (!collisionR) {
             if (crate.x === boxman.x + 32 && crate.y === boxman.y) {
@@ -431,6 +436,7 @@ function motion() {
 
 //Animasi untuk boxman
 function boxmanAnimate(box_x, box_y) {
+    'use strict';
     if (box_x !== boxman.x || box_y !== boxman.y) { // Kalau kedudukan berubah
         if (boxman.limiter === 0) {
             boxman.frame_index = 4 * boxman.arah + (boxman.frame_index + 1) % 4;
@@ -442,6 +448,7 @@ function boxmanAnimate(box_x, box_y) {
 }
 
 function collisionCheck(box_x, box_y) {
+    'use strict';
     var entArray2_length = entArray2.length;
     for (var ent = 0; ent < entArray2_length; ent++) {
         // Uji jarak boleh bercakap
@@ -703,6 +710,20 @@ function tulis(text, player, player_x, player_y, NPC) {
                 if (vx - 4 >= 0) vx -= 4;
             } else {
                 if (vx - 1 >= 0) vx -= 1;
+            }
+        }
+        
+        if (ygbercakap.y - vy + 16 > initHeight / 2) {
+            if (ygbercakap.y - vy + 20 > initHeight / 2) { //16 + 4 = 20
+                if (vy + 4 <= 384) vy += 4; // 19tiles * 32px = 608
+            } else {
+                if (vy + 1 <= 384) vy += 1; // 608 - initHeight
+            }
+        } else if (ygbercakap.y - vy + 16 < initHeight / 2) {
+            if (ygbercakap.y - vy + 12 < initHeight / 2) { //16 - 4 = 12
+                if (vy - 4 >= 0) vy -= 4;
+            } else {
+                if (vy - 1 >= 0) vy -= 1;
             }
         }
     }
@@ -972,6 +993,5 @@ window.addEventListener('resize', function() {
     resizeCanvas = true;
 }, false);
 
-//currentScene = 0;
 gotoScene(0);
 gameLoop();
