@@ -1,5 +1,6 @@
 var interval = 1000 / 60,
     tile = new Image(),
+    bubble = new Image(),
     tileWidth = 32,
     tileHeight = 32,
     tileNo,
@@ -40,7 +41,8 @@ var interval = 1000 / 60,
     enpisi,
     
     // Collision detection
-    alligned = false,
+    //alligned = false,
+    alligned = true, // coba
     
     collisionL = false,
     collisionR = false,
@@ -149,6 +151,7 @@ var entArray = [
 var entArray2 = entArray.slice(1);
 
 tile.src = "./images/tile_gmc6.png";
+bubble.src = "./images/speech_bubble3.png";
 typeface.src = "./images/gohufont_sprite.png";
 
 tangga.src = "./images/tangga.png";
@@ -347,6 +350,7 @@ function movements() {
     'use strict';
     // If alligned to grid
     if (boxman.x % 32 === 0 && boxman.y % 32 === 0) {
+    //if (true) { // coba hilangkan grid
         alligned = true;
         
         if (!up && !down) { // disable diagonal movements
@@ -373,7 +377,8 @@ function movements() {
             dahlepas_inv = false;
         }
     } else {
-        alligned = false;
+        //alligned = false;
+        alligned = true; // coba
     }
 }
 
@@ -503,21 +508,32 @@ function drawTextbox(x1, y1, x2, y2, char_x) {
     'use strict';
     // boleh buat lagi efficient ni kot...
     
-    //ctx.fillStyle = '#FFF';
-    ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y1);
-    ctx.lineTo(x2, y2);
-    
-    /* Mungkin boleh tukar segi tiga ni jadi image 
-     * supaya nampak pixelated tanpa anti-alias */
-    ctx.lineTo(char_x + 21, y2);
-    ctx.lineTo(char_x + 16, y2 + 5);
-    ctx.lineTo(char_x + 11, y2);
-    
-    ctx.lineTo(x1, y2);
-    ctx.closePath();
-    ctx.fill();
+    if (y2 - y1 < 44) {
+        //ctx.fillStyle = '#FFF';
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y1);
+        ctx.lineTo(x2, y2);
+        
+        /* Mungkin boleh tukar segi tiga ni jadi image 
+         * supaya nampak pixelated tanpa anti-alias */
+        ctx.lineTo(char_x + 21, y2);
+        ctx.lineTo(char_x + 16, y2 + 5);
+        ctx.lineTo(char_x + 11, y2);
+        
+        ctx.lineTo(x1, y2);
+        ctx.closePath();
+        ctx.fill();
+    } else {
+        x1 += 10;
+        x2 -= 10;
+        
+        //drawImage(image,sx,sy,sw,sh,dx,dy,dw,dh)
+        ctx.drawImage(bubble, 4, 0, 1, 44, x1, y1, x2 - x1, 44);
+        ctx.drawImage(bubble, 0, 0, 10, 44, x1 - 10, y1, 10, 44);
+        ctx.drawImage(bubble, 40, 0, 10, 44, x2, y1, 10, 44);
+        ctx.drawImage(bubble, 20, 42, 10, 7, char_x + 11, y2 - 2, 10, 7);
+    }
 }
 
 // Textbox kat tepi
@@ -566,6 +582,14 @@ function tulis(text, player, player_x, player_y, NPC) {
     if (!sdgcakap) {
         if (player.x === player_x && player.y === player_y) { // Kalau kedudukan tak berubah
             ctx.fillStyle = 'rgba(255, 255, 255, ' + NPC.legap + ')';
+            
+            // coba
+            /*ctx.save();
+            ctx.globalAlpha = NPC.legap;
+            ctx.fillStyle = 'rgb(255, 255, 255)';
+            ctx.restore();*/
+            // endcoba ///////////////
+            
             if (player.x === NPC.x) {
                 drawTextbox2(
                     NPC.x + 42 - vx,
@@ -987,6 +1011,10 @@ document.addEventListener('keyup', function (event) {
             dahlepas_inv = true;
             break;
     }
+});
+
+game_canvas.addEventListener('mouseup', function (event) {
+    console.log('asdasd');
 });
 
 window.addEventListener('resize', function() {
