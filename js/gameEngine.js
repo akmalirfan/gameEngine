@@ -1,5 +1,6 @@
 var interval = 1000 / 60,
     tile = new Image(),
+    tile2 = new Image(),
     bubble = new Image(),
     tileWidth = 32,
     tileHeight = 32,
@@ -151,6 +152,7 @@ var entArray = [
 var entArray2 = entArray.slice(1);
 
 tile.src = "./images/tile_gmc6.png";
+tile2.src = "./images/tile2.png";
 bubble.src = "./images/speech_bubble3.png";
 typeface.src = "./images/gohufont_sprite.png";
 
@@ -189,6 +191,14 @@ tileNo =
             [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
             [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
             [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
+        ],
+        [ // Ini tiles untuk scene1 yang second layer
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 2, 2, 3],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 5, 5, 5, 6],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 8],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 8],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,10,10,10,11]
         ]
     ];
 
@@ -310,6 +320,24 @@ function drawTiles() {
                 tile,
                 0,
                 tileNo[currentScene][j][i] * tileHeight,
+                tileWidth,
+                tileHeight,
+                i * tileWidth - vx,
+                j * tileHeight - vy,
+                tileWidth,
+                tileHeight);
+        }
+    }
+}
+
+function draw2ndTiles() { // Function sementara
+    'use strict';
+    for (var i = 0, tileNo0_l = tileNo[2][0].length; i < tileNo0_l; i++) {
+        for (var j = 0, tileNo_l = tileNo[2].length; j < tileNo_l; j++) {
+            ctx.drawImage(
+                tile2,
+                0,
+                tileNo[2][j][i] * tileHeight,
                 tileWidth,
                 tileHeight,
                 i * tileWidth - vx,
@@ -827,6 +855,9 @@ function scene0() {
 
     // Draw watak ikut depth
     drawCharacters();
+    
+    // Draw tiles for second layer
+    draw2ndTiles();
     
     ///////////////////////////
     
