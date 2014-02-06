@@ -80,8 +80,10 @@ function Character(img_src, textID) {
     this.y;
     this.hspeed = 0;
     this.vspeed = 0;
-    this.arah = 0; // 0(kanan) 1(kiri) >> nak guna tribool?
-    this.frame_index = 0;
+    this.arah_hor = 0; // 0(kanan) 1(kiri) >> nak guna tribool?
+    this.arah_ver = 0; // 0(bawah) 1(atas)
+    this.frame_row = 0;
+    this.frame_column = 0;
     this.limiter = 0;
     this.depth = 0;
     this.textID = textID;
@@ -93,8 +95,8 @@ function Character(img_src, textID) {
         //drawImage(image,sx,sy,sw,sh,dx,dy,dw,dh)
         ctx.drawImage(
                 this.sprite,
-                this.frame_index * 32,
-                0,
+                this.frame_column * 32,
+                this.frame_row * 32,
                 32,
                 32,
                 this.x - vx,
@@ -371,20 +373,50 @@ function movements() {
     //if (true) { // coba hilangkan grid
         alligned = true;
         
+        if (up) {
+            boxman.frame_column = 1;
+            boxman.arah_ver = 1;
+            boxman.frame_row = 0 + 4 * boxman.arah_ver;
+        }
+        
+        if (down) {
+            boxman.frame_column = 1;
+            boxman.arah_ver = 0;
+            boxman.frame_row = 0 + 4 * boxman.arah_ver;
+        }
+        
+        //boxman.frame_row = 0 + 4 * boxman.arah_ver;
+        
+        if (left) {
+            boxman.frame_column = 0;
+            boxman.arah_hor = 1;
+            boxman.frame_row = 0 + 4 * boxman.arah_hor;
+        }
+        
+        if (right) {
+            boxman.frame_column = 0;
+            boxman.arah_hor = 0;
+            boxman.frame_row = 0 + 4 * boxman.arah_hor;
+        }
+        
+        //boxman.frame_row = 0 + 4 * boxman.arah_hor;
+        
         if (!up && !down) { // disable diagonal movements
             if (left) {
                 boxman.hspeed = -2;
-                boxman.arah = 1;
             }
             if (right) {
                 boxman.hspeed = 2;
-                boxman.arah = 0;
             }
         }
         
         if (!left && !right) { // disable diagonal movements
-            if (up) boxman.vspeed = -2;
-            if (down) boxman.vspeed = 2;
+            if (up) {
+                boxman.vspeed = -2;
+            }
+            if (down) {
+                boxman.vspeed = 2;
+            }
         }
         
         if (!left && !right) boxman.hspeed = 0;
@@ -460,14 +492,21 @@ function motion() {
 //Animasi untuk boxman
 function boxmanAnimate(box_x, box_y) {
     'use strict';
-    if (box_x !== boxman.x || box_y !== boxman.y) { // Kalau kedudukan berubah
+    if (box_x !== boxman.x) { // Kalau kedudukan berubah
+        boxman.frame_column = 0;
         if (boxman.limiter === 0) {
-            boxman.frame_index = 4 * boxman.arah + (boxman.frame_index + 1) % 4;
+            boxman.frame_row = 4 * boxman.arah_hor + (boxman.frame_row + 1) % 4;
         }
         boxman.limiter = (boxman.limiter + 1) % 4;
-    } else {
-        boxman.frame_index = 0 + 4 * boxman.arah;
-    }
+    } else if (box_y !== boxman.y) { // Kalau kedudukan berubah
+        boxman.frame_column = 1;
+        if (boxman.limiter === 0) {
+            boxman.frame_row = 4 * boxman.arah_ver + (boxman.frame_row + 1) % 4;
+        }
+        boxman.limiter = (boxman.limiter + 1) % 4;
+    }/* else { // Kalau stay (macam tak perlu)
+        boxman.frame_row = 0 + 4 * boxman.arah_hor;
+    }*/
 }
 
 function collisionCheck(box_x, box_y) {
@@ -626,11 +665,22 @@ function tulis(text, player, player_x, player_y, NPC) {
     } else {
         //Tukar sprite player berdasarkan kedudukan NPC
         if (player.x > NPC.x) {
-            player.arah = 1;
+            player.frame_column = 0;
+            player.arah_hor = 1;
+            boxman.frame_row = 4 * boxman.arah_hor;
         } else if (player.x < NPC.x) {
-            player.arah = 0;
+            player.frame_column = 0;
+            player.arah_hor = 0;
+            boxman.frame_row = 4 * boxman.arah_hor;
+        } else if (player.y > NPC.y) {
+            player.frame_column = 1;
+            player.arah_ver = 1;
+            boxman.frame_row = 4 * boxman.arah_ver;
+        } else if (player.y < NPC.y) {
+            player.frame_column = 1;
+            player.arah_ver = 0;
+            boxman.frame_row = 4 * boxman.arah_ver;
         }
-        boxman.frame_index = 4 * boxman.arah;
         
         if (text[NPC.tukar][21] === '#') {
             var ygbercakap = NPC;
@@ -854,11 +904,11 @@ function scene0() {
     // Tukar frame index monstak berdasarkan
     // kedudukan boxman
     if (monstak !== undefined) // coba
-        monstak.frame_index = (boxman.x > monstak.x) ? 0 : 4;
+        monstak.frame_row = (boxman.x > monstak.x) ? 0 : 4;
     
     // Tukar frame index kk berdasarkan
     // kedudukan boxman
-    kk.frame_index = (boxman.x > kk.x) ? 0 : 1;
+    kk.frame_row = (boxman.x > kk.x) ? 0 : 1;
     
     if (!sdgcakap) {
         movements();
@@ -918,7 +968,7 @@ function scene1() {
     collisionD2 = false;
     collisionU2 = false;
     
-    drawTiles(0, 0, currentscene, 0, tile);
+    drawTiles(0, 0, currentScene, 0, tile);
     
     // Tetapkan depth
     boxman.depth = -boxman.y;
