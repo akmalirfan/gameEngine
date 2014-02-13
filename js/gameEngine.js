@@ -72,14 +72,23 @@ var interval = 1000 / 60,
     ctx = canvas.getContext('2d');
 
 /* Constructor */
-function Character(img_src, textID) {
+function Entity() {
     'use strict';
-    this.sprite = new Image();
-    this.sprite.src = img_src;
     this.x;
     this.y;
     this.hspeed = 0;
     this.vspeed = 0;
+    this.inView = false;
+}
+
+function Character(img_src, textID) {
+    'use strict';
+    this.sprite = new Image();
+    if (img_src !== null) this.sprite.src = img_src;
+    //this.x;
+    //this.y;
+    //this.hspeed = 0;
+    //this.vspeed = 0;
     this.arah_hor = 0; // 0(kanan) 1(kiri) >> nak guna tribool?
     this.arah_ver = 0; // 0(bawah) 1(atas)
     this.frame_row = 0;
@@ -89,21 +98,23 @@ function Character(img_src, textID) {
     this.textID = textID;
     this.text = 0;
     
-    this.inView = false;
+    //this.inView = false;
     
     this.draw = function() {
         //drawImage(image,sx,sy,sw,sh,dx,dy,dw,dh)
-        ctx.drawImage(
-                this.sprite,
-                this.frame_column * 32,
-                this.frame_row * 32,
-                32,
-                32,
-                this.x - vx,
-                this.y - vy,
-                32,
-                32
-            );
+        if (img_src !== null) {
+            ctx.drawImage(
+                    this.sprite,
+                    this.frame_column * 32,
+                    this.frame_row * 32,
+                    32,
+                    32,
+                    this.x - vx,
+                    this.y - vy,
+                    32,
+                    32
+                );
+        }
     };
     
     /// BERKAITAN CHAT ENGINE ///
@@ -119,46 +130,48 @@ function Character(img_src, textID) {
     //this.kanan = x + 112;
 }
 
+Character.prototype = new Entity();
+
 var entArray = [
     // Main character
-    boxman = new Character("./images/mainChar.png", null),
+    boxman = new Character("./img/mainChar.png", null),
     
     // Invisible walls
-    invWalls1 = new Character(null, null),
-    invWalls2 = new Character(null, null),
-    invWalls3 = new Character(null, null),
-    invWalls4 = new Character(null, null),
-    invWalls5 = new Character(null, null),
-    invWalls6 = new Character(null, null),
-    invWalls7 = new Character(null, null),
-    invWalls8 = new Character(null, null),
-    invWalls9 = new Character(null, null),
-    invWalls10 = new Character(null, null),
-    invWalls11 = new Character(null, null),
-    invWalls12 = new Character(null, null),
-    invWalls13 = new Character(null, null),
-    invWalls14 = new Character(null, null),
-    invWalls15 = new Character(null, null),
-    invWalls16 = new Character(null, null),
+    invWalls1 = new Entity(),
+    invWalls2 = new Entity(),
+    invWalls3 = new Entity(),
+    invWalls4 = new Entity(),
+    invWalls5 = new Entity(),
+    invWalls6 = new Entity(),
+    invWalls7 = new Entity(),
+    invWalls8 = new Entity(),
+    invWalls9 = new Entity(),
+    invWalls10 = new Entity(),
+    invWalls11 = new Entity(),
+    invWalls12 = new Entity(),
+    invWalls13 = new Entity(),
+    invWalls14 = new Entity(),
+    invWalls15 = new Entity(),
+    invWalls16 = new Entity(),
     
     // NPCs
-    monstak = new Character("./images/monsta.png", 0),
-    boxbiru = new Character("./images/npc_biru.png", 1),
-    kk = new Character("./images/kk.png", 2),
+    monstak = new Character("./img/monsta.png", 0),
+    boxbiru = new Character("./img/npc_biru.png", 1),
+    kk = new Character("./img/kk.png", 2),
     
     // Objects
-    crate = new Character("./images/crate.png", null)
+    crate = new Character("./img/crate.png", null)
 ];
 
 // Sama macam entArray cuma takde boxman
 var entArray2 = entArray.slice(1);
 
-tile.src = "./images/tile_gmc6.png";
-tile2.src = "./images/tile2.png";
-bubble.src = "./images/speech_bubble3.png";
-typeface.src = "./images/gohufont_sprite.png";
+tile.src = "./img/tile_gmc6.png";
+tile2.src = "./img/tile2.png";
+bubble.src = "./img/speech_bubble3.png";
+typeface.src = "./img/gohufont_sprite.png";
 
-tangga.src = "./images/tangga.png";
+tangga.src = "./img/tangga.png";
 
 // Insert polyfill here
 
@@ -320,7 +333,6 @@ function gotoScene(scene) {
 }
 
 // Function untuk lukis tiles
-
 function drawTiles(row, column, scene, layer, tileset) {
     'use strict';
     for (var i = column, tileNo0_l = tileNo[scene][layer][0].length; i < tileNo0_l; i++) {
@@ -350,19 +362,21 @@ function drawCharacters() {
         return b.depth - a.depth;
     });
     
-    /* Lukis ikut turutan */
+    // Lukis ikut turutan
     for (var i = 0; i < entArray_length; i++) {
-        if (entArray[i] !== undefined) { // coba
+        if (entArray[i] !== undefined) {
             if (entArray[i].x-vx >= -32
                 && entArray[i].x-vx < game_canvas.width
                 && entArray[i].y-vy >= -32
                 && entArray[i].y-vy < game_canvas.height) {
                 entArray[i].inView = true;
-                entArray[i].draw();
+                if (entArray[i] instanceof Character) {
+                    entArray[i].draw();
+                }
             } else {
                 entArray[i].inView = false;
             }
-        } // coba
+        }
     }
 }
 
@@ -405,6 +419,7 @@ function movements() {
             if (left) {
                 boxman.hspeed = -2;
             }
+            
             if (right) {
                 boxman.hspeed = 2;
             }
@@ -414,12 +429,14 @@ function movements() {
             if (up) {
                 boxman.vspeed = -2;
             }
+            
             if (down) {
                 boxman.vspeed = 2;
             }
         }
         
         if (!left && !right) boxman.hspeed = 0;
+        
         if (!up && !down) boxman.vspeed = 0;
         
         if (dahlepas_inv && inv) {
@@ -521,7 +538,9 @@ function collisionCheck(box_x, box_y) {
             entArray2[ent].can_interact = true;
             if (entArray2[ent] !== crate) // coba
                 enpisi = entArray2[ent];
-            if (enpisi !== undefined && enpisi.textID !== null) {
+            if (enpisi !== undefined
+                && enpisi.textID !== null
+                && enpisi instanceof Character) {
                 tulis(
                     text[enpisi.textID][enpisi.text],
                     boxman,
@@ -561,59 +580,72 @@ function collisionCheck(box_x, box_y) {
     }
 }
 
-function drawTextbox(x1, y1, x2, y2, char_x) {
-    'use strict';
-    // boleh buat lagi efficient ni kot...
+function drawTextbox(player, NPC, ygbercakap_x, ygbercakap_y, text_width) {
+    var x1, y1, x2, y2;
     
-    if (y2 - y1 < 44) {
-        //ctx.fillStyle = '#FFF';
-        ctx.beginPath();
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x2, y1);
-        ctx.lineTo(x2, y2);
-        
-        /* Mungkin boleh tukar segi tiga ni jadi image 
-         * supaya nampak pixelated tanpa anti-alias */
-        ctx.lineTo(char_x + 21, y2);
-        ctx.lineTo(char_x + 16, y2 + 5);
-        ctx.lineTo(char_x + 11, y2);
-        
-        ctx.lineTo(x1, y2);
-        ctx.closePath();
-        ctx.fill();
-    } else {
-        x1 += 10;
-        x2 -= 10;
-        
-        //drawImage(image,sx,sy,sw,sh,dx,dy,dw,dh)
-        ctx.drawImage(bubble, 4, 0, 1, 44, x1, y1, x2 - x1, 44);
-        ctx.drawImage(bubble, 0, 0, 10, 44, x1 - 10, y1, 10, 44);
-        ctx.drawImage(bubble, 40, 0, 10, 44, x2, y1, 10, 44);
-        ctx.drawImage(bubble, 20, 42, 10, 7, char_x + 11, y2 - 2, 10, 7);
-    }
-}
+    if (player.x !== NPC.x) {
+        if (NPC.tukar === 0) {
+            x1 = NPC.x + 6 - vx;
+            y1 = NPC.y - 28 - vy;
+            x2 = NPC.x + 26 - vx;
+            y2 = NPC.y - 13 - vy;
+            
+            ctx.drawImage(bubble, 50, 0, 20, 18, NPC.x - vx + 6, NPC.y - vy - 20, 20, 18);
+        } else { // tukar > 0
+            x1 = ygbercakap_x - vx + 16 - (text_width / 2 + 10);
+            y1 = ygbercakap_y - vy - 57;
+            x2 = ygbercakap_x - vx + 16 + (text_width / 2 + 10);
+            y2 = ygbercakap_y - vy - 13;
+            
+            x1 += 10;
+            x2 -= 10;
 
-// Textbox kat tepi
-function drawTextbox2(x1, y1, x2, y2) {
-    'use strict';
-    // boleh buat lagi efficient ni kot...
-    
-    //ctx.fillStyle = '#FFF';
-    ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y1);
-    ctx.lineTo(x2, y2);
-    ctx.lineTo(x1, y2);
-    
-    /* Mungkin boleh tukar segi tiga ni jadi image 
-     * supaya nampak pixelated tanpa anti-alias */
-    ctx.lineTo(x1, y2 - 11);
-    //ctx.lineTo(x1 - 5, y2 - 9);
-    ctx.lineTo(x1 - 5, y2 - 4);
-    ctx.lineTo(x1, y2 - 4);
-    
-    ctx.closePath();
-    ctx.fill();
+            //drawImage(image,sx,sy,sw,sh,dx,dy,dw,dh)
+            ctx.drawImage(bubble, 4, 0, 1, 44, x1, y1, x2 - x1, 44); // latar
+            ctx.drawImage(bubble, 0, 0, 10, 44, x1 - 10, y1, 10, 44);
+            ctx.drawImage(bubble, 40, 0, 10, 44, x2, y1, 10, 44);
+            ctx.drawImage(bubble, 20, 42, 10, 7, ygbercakap_x - vx + 11, y2 - 2, 10, 7); // segi tiga
+        }
+    } else { // player.x === NPC.x
+        if (NPC.tukar === 0) {
+            if (player.y > NPC.y) {
+                ctx.drawImage(bubble, 50, 0, 20, 18, NPC.x - vx + 6, NPC.y - vy - 20, 20, 18);
+            } else {
+                ctx.drawImage(bubble, 50, 18, 20, 18, NPC.x - vx + 6, NPC.y - vy + 34, 20, 18);
+            }
+        } else { // tukar > 0
+            if ((ygbercakap_y === NPC.y && NPC.y < player.y)
+                || (ygbercakap_y === player.y && NPC.y > player.y)) {
+                x1 = ygbercakap_x - vx + 16 - (text_width / 2 + 10);
+                y1 = ygbercakap_y - vy - 57;
+                x2 = ygbercakap_x - vx + 16 + (text_width / 2 + 10);
+                y2 = ygbercakap_y - vy - 13;
+
+                x1 += 10;
+                x2 -= 10;
+
+                //drawImage(image,sx,sy,sw,sh,dx,dy,dw,dh)
+                ctx.drawImage(bubble, 4, 0, 1, 44, x1, y1, x2 - x1, 44); // latar
+                ctx.drawImage(bubble, 0, 0, 10, 44, x1 - 10, y1, 10, 44);
+                ctx.drawImage(bubble, 40, 0, 10, 44, x2, y1, 10, 44);
+                ctx.drawImage(bubble, 20, 42, 10, 7, ygbercakap_x - vx + 11, y2 - 2, 10, 7); // segi tiga
+            } else {
+                x1 = ygbercakap_x - vx + 16 - (text_width / 2 + 10);
+                y1 = ygbercakap_y - vy + 45;
+                x2 = ygbercakap_x - vx + 16 + (text_width / 2 + 10);
+                y2 = ygbercakap_y - vy + 89;
+
+                x1 += 10;
+                x2 -= 10;
+
+                //drawImage(image,sx,sy,sw,sh,dx,dy,dw,dh)
+                ctx.drawImage(bubble, 4, 0, 1, 44, x1, y1, x2 - x1, 44); // latar
+                ctx.drawImage(bubble, 0, 0, 10, 44, x1 - 10, y1, 10, 44);
+                ctx.drawImage(bubble, 40, 0, 10, 44, x2, y1, 10, 44);
+                ctx.drawImage(bubble, 20, 15, 10, 7, ygbercakap_x - vx + 11, y1 - 5, 10, 7); // segi tiga
+            }
+        }
+    }
 }
 
 function textToBekas(bekasIndex, text) {
@@ -627,11 +659,7 @@ function textToBekas(bekasIndex, text) {
 // LUKIS TEXTBOX + 'TULIS' ////////////////
 function tulis(text, player, player_x, player_y, NPC) {
     'use strict';
-    if (NPC.tukar === 0) {
-        sdgcakap = false;
-    } else {
-        sdgcakap = true;
-    }
+    sdgcakap = (NPC.tukar === 0) ? false : true;
     
     NPC.legap += 0.1;
 	if (NPC.legap > 1) NPC.legap = 1; // hadkan nilai legap
@@ -647,20 +675,9 @@ function tulis(text, player, player_x, player_y, NPC) {
             ctx.restore();*/
             // endcoba ///////////////
             
-            if (player.x === NPC.x) {
-                drawTextbox2(
-                    NPC.x + 42 - vx,
-                    NPC.y - vy,
-                    NPC.x + 62 - vx,
-                    NPC.y + 19 - vy);
-            } else {
-                drawTextbox(
-                    NPC.x + 6 - vx,
-                    NPC.y - 28 - vy,
-                    NPC.x + 26 - vx,
-                    NPC.y - 13 - vy,
-                    NPC.x - vx);
-            }
+            ygbercakap = player;
+            
+            drawTextbox(player, NPC, ygbercakap.x, ygbercakap.y, text_width);
         }
     } else {
         //Tukar sprite player berdasarkan kedudukan NPC
@@ -682,11 +699,7 @@ function tulis(text, player, player_x, player_y, NPC) {
             boxman.frame_row = 4 * boxman.arah_ver;
         }
         
-        if (text[NPC.tukar][21] === '#') {
-            var ygbercakap = NPC;
-        } else {
-            var ygbercakap = player;
-        }
+        var ygbercakap = (text[NPC.tukar][21] === '#') ? NPC : player;
         
         var text_width; //lebar dalam pixel
         if (var_panjang[0] > var_panjang[1]) {
@@ -696,30 +709,22 @@ function tulis(text, player, player_x, player_y, NPC) {
         }
         
         ctx.fillStyle = '#FFF';
-        if (player.x === NPC.x) {
-            drawTextbox2(
-                ygbercakap.x - vx + 42,
-                ygbercakap.y - vy - 22,
-                ygbercakap.x - vx + 42 + (text_width + 20),
-                ygbercakap.y - vy + 22);
-        } else {
-            drawTextbox(
-                ygbercakap.x - vx + 16 - (text_width / 2 + 10),
-                ygbercakap.y - vy - 57,
-                ygbercakap.x - vx + 16 + (text_width / 2 + 10),
-                ygbercakap.y - vy - 13,
-                ygbercakap.x - vx);
-        }
+        
+        drawTextbox(player, NPC, ygbercakap.x, ygbercakap.y, text_width);
 
         // 'TULIS' //////////////////
         // bekas[0] (baris pertama)
         
+        var string_reg_x = ygbercakap.x - vx + 16 - var_panjang[0] * char_width / 2;
+        
         if (player.x === NPC.x) {
-            var string_reg_x = ygbercakap.x - vx + 52;
-            var string_reg_y = ygbercakap.y - 11;
+            if ((ygbercakap === NPC && NPC.y < player.y)
+                || (ygbercakap === player && NPC.y > player.y)) {
+                var string_reg_y = ygbercakap.y - 46; //13 + char_height*3 = 46
+            } else {
+                var string_reg_y = ygbercakap.y + 56; //46+32-char_height*2= 56
+            }
         } else {
-            // sebelum ni 'var_panjang[0] * char_width;' guna text_width //
-            var string_reg_x = ygbercakap.x - vx + 16 - var_panjang[0] * char_width / 2;
             var string_reg_y = ygbercakap.y - 46; //13 + char_height*3 = 46
         }
 
@@ -769,11 +774,7 @@ function tulis(text, player, player_x, player_y, NPC) {
 
         textToBekas(1, text[NPC.tukar].substring(22, 22 + var_panjang[1]));
         
-        if (player.x !== NPC.x) {
-            //text_width = var_panjang[1] * char_width;
-            //string_reg_x = ygbercakap.x - vx + 16 - text_width / 2;
-            string_reg_x = ygbercakap.x - vx + 16 - var_panjang[1] * char_width / 2;
-        }
+        string_reg_x = ygbercakap.x - vx + 16 - var_panjang[1] * char_width / 2;
         
         string_reg_y += 11;
         for (i = 0; i < panjang_teks; i++) {
@@ -922,11 +923,7 @@ function scene0() {
             // Uji jarak dan collision
             collisionCheck(box_x, box_y);
             
-            if (crate.x === 32 && crate.y === 32) {
-                unlock = true;
-            } else {
-                unlock = false;
-            }
+            unlock = (crate.x === 32 && crate.y === 32) ? true : false;
         }
         
         // Gerakkan boxman dan crate
