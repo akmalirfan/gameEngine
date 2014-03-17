@@ -6,6 +6,10 @@ var interval = 1000 / 60,
     tileHeight = 32,
     tileNo,
     
+    sineTable = [],
+    sineTblBerubah = [],
+    cameraCounter = 0,
+    
     // Untuk resize canvas
     resizeCanvas = true,
     initWidth = 352,
@@ -27,9 +31,7 @@ var interval = 1000 / 60,
     space = false,
     inv = false,
     inv_arr = [],
-    
-    // Barang-barang dalam inventory
-    tangga = new Image(),
+    inv_arrQty = [],
     
     unlock = false,
     
@@ -42,8 +44,7 @@ var interval = 1000 / 60,
     enpisi,
     
     // Collision detection
-    //alligned = false,
-    alligned = true, // coba
+    alligned = false,
     
     collisionL = false,
     collisionR = false,
@@ -70,6 +71,22 @@ var interval = 1000 / 60,
     
     game_canvas = document.getElementById('canvas'),
     ctx = canvas.getContext('2d');
+    
+    // Kira siap-siap, masukkan dalam table
+    for (var i = 0, j = 0; i <= 90; i += 5, j++) {
+        sineTable[j] = Math.round(Math.sin(i / 180 * Math.PI) * 32);
+    }
+
+    sineTblBerubah[0] = 0;
+
+    // Cari perubahan
+    for (var i = 1; i <= 18; i++) {
+        if (sineTable[i] === sineTable[i - 1]) {
+            sineTblBerubah[i] = 0;
+        } else {
+            sineTblBerubah[i] = sineTable[i] - sineTable[i - 1];
+        }
+    }
 
 /* Constructor */
 function Entity() {
@@ -85,10 +102,6 @@ function Character(img_src, textID) {
     'use strict';
     this.sprite = new Image();
     if (img_src !== null) this.sprite.src = img_src;
-    //this.x;
-    //this.y;
-    //this.hspeed = 0;
-    //this.vspeed = 0;
     this.arah_hor = 0; // 0(kanan) 1(kiri) >> nak guna tribool?
     this.arah_ver = 0; // 0(bawah) 1(atas)
     this.frame_row = 0;
@@ -97,9 +110,6 @@ function Character(img_src, textID) {
     this.depth = 0;
     this.textID = textID;
     this.text = 0;
-    
-    //this.inView = false;
-    
     this.draw = function() {
         //drawImage(image,sx,sy,sw,sh,dx,dy,dw,dh)
         if (img_src !== null) {
@@ -119,18 +129,45 @@ function Character(img_src, textID) {
     
     /// BERKAITAN CHAT ENGINE ///
     this.legap = 0;
-    //this.bekas = ['', '']; // variable untuk simpan ayat yg dah dibahagi
     
     this.can_interact = false;
-    //this.var_panjang = 0;
-    //this.var_panjang2 = 0;
     this.tukar = 0;
-    //player = obj_char;
-    //this.kiri = x - 80;
-    //this.kanan = x + 112;
 }
 
 Character.prototype = new Entity();
+
+// Item constructor
+function Item(img_src, name, price) {
+    'use strict';
+    this.sprite = new Image();
+    this.sprite.src = img_src;
+    this.name = name;
+    this.price = price;
+}
+
+// Barang-barang dalam inventory
+var tangga = new Item("./img/tangga.png", "tangga", 2);
+
+function masuk(item) {
+    var inv_arrLength = inv_arr.length,
+        had = false,
+        index;
+    
+    // Uji item dah ada ke belum
+    for (var i = 0; i < inv_arrLength; i++) {
+        if (inv_arr[i] === item) {
+            had = true;
+            index = i;
+        }
+    }
+    
+    if (had) {
+        inv_arrQty[index]++;
+    } else {
+        inv_arr.push(item);
+        inv_arrQty.push(1);
+    }
+}
 
 var entArray = [
     // Main character
@@ -170,8 +207,6 @@ tile.src = "./img/tile_gmc6.png";
 tile2.src = "./img/tile2.png";
 bubble.src = "./img/speech_bubble3.png";
 typeface.src = "./img/gohufont_sprite.png";
-
-tangga.src = "./img/tangga.png";
 
 // Insert polyfill here
 
@@ -384,7 +419,6 @@ function movements() {
     'use strict';
     // If alligned to grid
     if (boxman.x % 32 === 0 && boxman.y % 32 === 0) {
-    //if (true) { // coba hilangkan grid
         alligned = true;
         
         if (up) {
@@ -399,8 +433,6 @@ function movements() {
             boxman.frame_row = 0 + 4 * boxman.arah_ver;
         }
         
-        //boxman.frame_row = 0 + 4 * boxman.arah_ver;
-        
         if (left) {
             boxman.frame_column = 0;
             boxman.arah_hor = 1;
@@ -412,8 +444,6 @@ function movements() {
             boxman.arah_hor = 0;
             boxman.frame_row = 0 + 4 * boxman.arah_hor;
         }
-        
-        //boxman.frame_row = 0 + 4 * boxman.arah_hor;
         
         if (!up && !down) { // disable diagonal movements
             if (left) {
@@ -584,14 +614,7 @@ function drawTextbox(player, NPC, ygbercakap_x, ygbercakap_y, text_width) {
     var x1, y1, x2, y2;
     
     if (player.x !== NPC.x) {
-        if (NPC.tukar === 0) {
-            x1 = NPC.x + 6 - vx;
-            y1 = NPC.y - 28 - vy;
-            x2 = NPC.x + 26 - vx;
-            y2 = NPC.y - 13 - vy;
-            
-            ctx.drawImage(bubble, 50, 0, 20, 18, NPC.x - vx + 6, NPC.y - vy - 20, 20, 18);
-        } else { // tukar > 0
+        if (NPC.tukar !== 0) {
             x1 = ygbercakap_x - vx + 16 - (text_width / 2 + 10);
             y1 = ygbercakap_y - vy - 57;
             x2 = ygbercakap_x - vx + 16 + (text_width / 2 + 10);
@@ -607,13 +630,7 @@ function drawTextbox(player, NPC, ygbercakap_x, ygbercakap_y, text_width) {
             ctx.drawImage(bubble, 20, 42, 10, 7, ygbercakap_x - vx + 11, y2 - 2, 10, 7); // segi tiga
         }
     } else { // player.x === NPC.x
-        if (NPC.tukar === 0) {
-            if (player.y > NPC.y) {
-                ctx.drawImage(bubble, 50, 0, 20, 18, NPC.x - vx + 6, NPC.y - vy - 20, 20, 18);
-            } else {
-                ctx.drawImage(bubble, 50, 18, 20, 18, NPC.x - vx + 6, NPC.y - vy + 34, 20, 18);
-            }
-        } else { // tukar > 0
+        if (NPC.tukar !== 0) {
             if ((ygbercakap_y === NPC.y && NPC.y < player.y)
                 || (ygbercakap_y === player.y && NPC.y > player.y)) {
                 x1 = ygbercakap_x - vx + 16 - (text_width / 2 + 10);
@@ -651,6 +668,7 @@ function drawTextbox(player, NPC, ygbercakap_x, ygbercakap_y, text_width) {
 function textToBekas(bekasIndex, text) {
     'use strict';
     var text_length = text.length;
+    
     for (var i = 0; i < text_length; i++) {
         bekas[bekasIndex][i] = (text.charCodeAt(i) - 32) * char_width;
     }
@@ -792,7 +810,22 @@ function tulis(text, player, player_x, player_y, NPC) {
         }
         
         // ketengahkan kamera ke character yang bercakap
-        if (ygbercakap.x - vx + 16 > initWidth / 2) {
+        if (initWidth / 2 !== ygbercakap.x - vx + 16 || initHeight / 2 !== ygbercakap.y - vy + 16) {
+            cameraCounter = (cameraCounter + 1) % 19; // sineTblBerubah.length === 19
+            if (ygbercakap.x - vx + 16 > initWidth / 2) {
+                vx += sineTblBerubah[cameraCounter];
+            } else if (ygbercakap.x - vx + 16 < initWidth / 2) {
+                vx -= sineTblBerubah[cameraCounter];
+            } else if (ygbercakap.y - vy + 16 > initHeight / 2) {
+                vy += sineTblBerubah[cameraCounter];
+            } else if (ygbercakap.y - vy + 16 < initHeight / 2) {
+                vy -= sineTblBerubah[cameraCounter];
+            }
+        } else {
+            cameraCounter = 0;
+        }
+        
+        /*if (ygbercakap.x - vx + 16 > initWidth / 2) {
             if (ygbercakap.x - vx + 20 > initWidth / 2) { //16 + 4 = 20
                 if (vx + 4 <= 416) vx += 4; // 24tiles * 32px = 768
             } else {
@@ -804,9 +837,7 @@ function tulis(text, player, player_x, player_y, NPC) {
             } else {
                 if (vx - 1 >= 0) vx -= 1;
             }
-        }
-        
-        if (ygbercakap.y - vy + 16 > initHeight / 2) {
+        } else if (ygbercakap.y - vy + 16 > initHeight / 2) {
             if (ygbercakap.y - vy + 20 > initHeight / 2) { //16 + 4 = 20
                 if (vy + 4 <= 384) vy += 4; // 19tiles * 32px = 608
             } else {
@@ -818,7 +849,7 @@ function tulis(text, player, player_x, player_y, NPC) {
             } else {
                 if (vy - 1 >= 0) vy -= 1;
             }
-        }
+        }*/
     }
 }
 
@@ -943,6 +974,8 @@ function scene0() {
         }
         ///////////////////////////////////////
     } else if (enpisi.textID !== null) {
+        console.log(text[enpisi.textID][enpisi.text][enpisi.tukar]);
+        
         tulis(
             text[enpisi.textID][enpisi.text],
             boxman,
@@ -1001,8 +1034,8 @@ function inventory() {
     ctx.fillRect(115, 0, game_canvas.width - 115, game_canvas.height);
     
     // Tak fleksibel
-    if (inv_arr[0] === "tangga") {
-        ctx.drawImage(tangga, 135, 30);
+    if (inv_arr.length > 0 && inv_arr[0].name === "tangga") {
+        ctx.drawImage(tangga.sprite, 135, 30);
     }
     
     if (dahlepas_inv && inv) {
@@ -1027,8 +1060,8 @@ document.addEventListener('keydown', function (event) {
                         } else {
                             panjang_teks = 0;
                             enpisi.tukar = 0;
-                            if (enpisi === kk) {
-                                inv_arr.push("tangga");
+                            if (enpisi === kk && kk.text === 0) {
+                                masuk(tangga);
                                 kk.text = 1;
                             }
                         }
