@@ -5,9 +5,12 @@ var interval = 1000 / 60,
     tileWidth = 32,
     tileHeight = 32,
     tileNo,
+    i,
+    j,
     
     sineTable = [],
     sineTblBerubah = [],
+    sineTblBerubah_length,
     cameraCounter = 0,
     
     // Untuk resize canvas
@@ -30,10 +33,16 @@ var interval = 1000 / 60,
     down = false,
     space = false,
     inv = false,
-    inv_arr = [],
-    inv_arrQty = [],
     
     unlock = false,
+    
+    // Guna untuk inventory //
+    row = 0,
+    col = 0,
+    boleh_tekan = true,
+    // Parallel arrays
+    inv_arr = [],
+    inv_arrQty = [],
     
     // Berkaitan dengan scene
     currentScene,
@@ -72,21 +81,25 @@ var interval = 1000 / 60,
     game_canvas = document.getElementById('canvas'),
     ctx = canvas.getContext('2d');
     
-    // Kira siap-siap, masukkan dalam table
-    for (var i = 0, j = 0; i <= 90; i += 5, j++) {
-        sineTable[j] = Math.round(Math.sin(i / 180 * Math.PI) * 32);
-    }
+// Kira siap-siap, masukkan dalam table
+for (i = 0, j = 0; i <= 90; i += 10, j++) {
+    sineTable[j] = Math.round(Math.sin(i / 180 * Math.PI) * 32);
+}
 
-    sineTblBerubah[0] = 0;
+sineTblBerubah[0] = 0;
 
-    // Cari perubahan
-    for (var i = 1; i <= 18; i++) {
-        if (sineTable[i] === sineTable[i - 1]) {
-            sineTblBerubah[i] = 0;
-        } else {
-            sineTblBerubah[i] = sineTable[i] - sineTable[i - 1];
-        }
+// Cari perubahan
+for (i = 1; i <= 9; i++) {
+    if (sineTable[i] === sineTable[i - 1]) {
+        sineTblBerubah[i] = 0;
+    } else {
+        sineTblBerubah[i] = sineTable[i] - sineTable[i - 1];
     }
+}
+
+//sineTblBerubah = [0, 6, 6, 5, 5, 4, 2, 2, 2, 0];
+
+sineTblBerubah_length = sineTblBerubah.length;
 
 /* Constructor */
 function Entity() {
@@ -123,7 +136,7 @@ function Character(img_src, textID) {
                     this.y - vy,
                     32,
                     32
-                );
+            );
         }
     };
     
@@ -137,24 +150,85 @@ function Character(img_src, textID) {
 Character.prototype = new Entity();
 
 // Item constructor
-function Item(img_src, name, price) {
+function Item(img_src, name, textID, price) {
     'use strict';
     this.sprite = new Image();
     this.sprite.src = img_src;
     this.name = name;
+    this.textID = textID;
     this.price = price;
+    this.describe = function() {
+        'use strict';
+        var desc_length = text[3][0][this.textID].length;
+        
+        for (var i = 0; i < this.name.length; i++) {
+            //drawImage(image,sx,sy,sw,sh,dx,dy,dw,dh)
+            ctx.drawImage(
+                typeface,
+                (this.name.charCodeAt(i) - 32) * char_width,
+                0,
+                char_width,
+                char_height,
+                193 + i * char_width,
+                149,
+                char_width,
+                char_height);
+        }
+        
+        for (var i = 0; i < 21; i++) {
+            //drawImage(image,sx,sy,sw,sh,dx,dy,dw,dh)
+            ctx.drawImage(
+                typeface,
+                (text[3][0][this.textID].charCodeAt(i) - 32) * char_width,
+                0,
+                char_width,
+                char_height,
+                193 + i * char_width,
+                170,
+                char_width,
+                char_height);
+        }
+        
+        // Baris kedua (mula dari 22)
+        for (var i = 22; i < desc_length; i++) {
+            //drawImage(image,sx,sy,sw,sh,dx,dy,dw,dh)
+            ctx.drawImage(
+                typeface,
+                (text[3][0][this.textID].charCodeAt(i) - 32) * char_width,
+                0,
+                char_width,
+                char_height,
+                61 + i * char_width, //61 = 193 - 132  (132 = 6 * 22)
+                181,
+                char_width,
+                char_height);
+        }
+    }
 }
 
 // Barang-barang dalam inventory
-var tangga = new Item("./img/tangga.png", "tangga", 2);
+var tangga = new Item("./img/tangga.png", "Tangga", 0, 20),
+    roti = new Item("./img/roti.png", "Roti", 1, 5),
+    kelapa = new Item("./img/kelapa.png", "Kelapa", 2, 10);
+    kelapa2 = new Item("./img/kelapa.png", "Kelapa2", 2, 10);
+    kelapa3 = new Item("./img/kelapa.png", "Kelapa3", 2, 10);
+    kelapa4 = new Item("./img/kelapa.png", "Kelapa4", 2, 10);
 
+var select = [
+    [tangga, roti, kelapa],
+    [kelapa2, kelapa3, kelapa4]
+];
+
+// Masukkan barang dalam inventory
 function masuk(item) {
-    var inv_arrLength = inv_arr.length,
+    'use strict';
+    var i,
+        inv_arrLength = inv_arr.length,
         had = false,
         index;
     
     // Uji item dah ada ke belum
-    for (var i = 0; i < inv_arrLength; i++) {
+    for (i = 0; i < inv_arrLength; i++) {
         if (inv_arr[i] === item) {
             had = true;
             index = i;
@@ -211,52 +285,51 @@ typeface.src = "./img/gohufont_sprite.png";
 // Insert polyfill here
 
 // tileNo[currentScene][layer][baris]
-tileNo =
-    [
-        [ // scene0 /////////////////////////////////////////////////////////////////////
-            [ // layer 0
-                [3, 3, 3, 3, 3, 3, 3, 3, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
-                [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 3, 3, 3, 3, 3, 3, 3, 3, 2, 3, 3],
-                [3, 2, 3, 3, 3, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
-                [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,13,13,13,13,13, 3, 3, 3, 3, 3],
-                [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,13,13,13,13,13, 3, 3, 3, 3, 3],
-                [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,13,13,13,13,13, 3, 3, 3, 3, 3],
-                [3, 3, 2, 3, 3, 3, 2, 3, 3, 3, 3, 3, 3, 3,13,13,13,13,13, 3, 3, 3, 3, 3],
-                [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 3, 3, 3, 3, 3, 1, 3, 3, 3, 3, 2, 3, 3],
-                [3, 3, 4, 5, 5, 5, 6, 3, 3, 3, 3, 3, 3, 3, 3, 2, 3, 3, 3, 3, 3, 3, 3, 3],
-                [3, 3, 7, 8, 8, 8, 9, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
-                [3, 3, 7, 8, 8, 8, 9, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
-                [3, 3, 7, 8, 8, 8, 9, 3, 3, 3, 2, 3, 3, 3, 3, 3, 2, 3, 3, 3, 3, 3, 3, 3],
-                [3, 3,10,11,11,11,12, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 3, 3],
-                [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
-                [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3],
-                [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
-                [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
-                [3, 2, 3, 3, 3, 2, 3, 3, 3, 3, 3, 3, 3, 2, 3, 3, 3, 3, 3, 3, 3, 2, 3, 3],
-                [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
-            ],
-            [ // layer 1
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 2, 2, 3],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 5, 5, 5, 6],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 8],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 8],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,10,10,10,11],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,12,12,13,12,12]
-            ]
+tileNo = [
+    [ // scene0 /////////////////////////////////////////////////////////////////////
+        [ // layer 0
+            [3, 3, 3, 3, 3, 3, 3, 3, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+            [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 3, 3, 3, 3, 3, 3, 3, 3, 2, 3, 3],
+            [3, 2, 3, 3, 3, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+            [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,13,13,13,13,13, 3, 3, 3, 3, 3],
+            [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,13,13,13,13,13, 3, 3, 3, 3, 3],
+            [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,13,13,13,13,13, 3, 3, 3, 3, 3],
+            [3, 3, 2, 3, 3, 3, 2, 3, 3, 3, 3, 3, 3, 3,13,13,13,13,13, 3, 3, 3, 3, 3],
+            [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 3, 3, 3, 3, 3, 1, 3, 3, 3, 3, 2, 3, 3],
+            [3, 3, 4, 5, 5, 5, 6, 3, 3, 3, 3, 3, 3, 3, 3, 2, 3, 3, 3, 3, 3, 3, 3, 3],
+            [3, 3, 7, 8, 8, 8, 9, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+            [3, 3, 7, 8, 8, 8, 9, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+            [3, 3, 7, 8, 8, 8, 9, 3, 3, 3, 2, 3, 3, 3, 3, 3, 2, 3, 3, 3, 3, 3, 3, 3],
+            [3, 3,10,11,11,11,12, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 3, 3],
+            [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+            [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+            [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+            [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+            [3, 2, 3, 3, 3, 2, 3, 3, 3, 3, 3, 3, 3, 2, 3, 3, 3, 3, 3, 3, 3, 2, 3, 3],
+            [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
         ],
-        [ // scene0 /////////////////////////////////////////////////////////////////////
-            [ // layer 0
-                [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
-                [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
-                [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
-                [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
-                [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
-                [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
-                [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
-            ]
+        [ // layer 1
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 2, 2, 3],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 5, 5, 5, 6],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 8],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 8],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,10,10,10,11],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,12,12,13,12,12]
         ]
-    ];
+    ],
+    [ // scene1 /////////////////////////////////////////////////////////////////////
+        [ // layer 0
+            [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+            [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+            [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+            [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+            [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+            [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+            [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
+        ]
+    ]
+];
 
 // Function untuk pilih scene
 function gotoScene(scene) {
@@ -477,6 +550,85 @@ function movements() {
         //alligned = false;
         alligned = true; // coba
     }
+}
+
+// Guna semasa dalam menu
+function navigate() {
+    'use strict';
+    /*if (up) {
+        boxman.frame_column = 1;
+        boxman.arah_ver = 1;
+        boxman.frame_row = 0 + 4 * boxman.arah_ver;
+    }
+
+    if (down) {
+        boxman.frame_column = 1;
+        boxman.arah_ver = 0;
+        boxman.frame_row = 0 + 4 * boxman.arah_ver;
+    }*/
+    
+    if (boleh_tekan) {
+        // Row
+        if (up) {
+            if (row === 0) {
+                row = 1;
+            } else {
+                row -= 1;
+            }
+            boleh_tekan = false;
+        }
+
+        if (down) {
+            row = (row + 1) % 2;
+            boleh_tekan = false;
+        }
+        
+        // Column
+        if (left) {
+            if (col === 0) {
+                col = 2;
+            } else {
+                col -= 1;
+            }
+            boleh_tekan = false;
+        }
+
+        if (right) {
+            col = (col + 1) % 3;
+            boleh_tekan = false;
+        }
+    }
+    
+    if (!(up || down || left || right)) boleh_tekan = true;
+/*
+    if (!up && !down) { // disable diagonal movements
+        if (left) {
+            boxman.hspeed = -2;
+        }
+
+        if (right) {
+            boxman.hspeed = 2;
+        }
+    }
+
+    if (!left && !right) { // disable diagonal movements
+        if (up) {
+            boxman.vspeed = -2;
+        }
+
+        if (down) {
+            boxman.vspeed = 2;
+        }
+    }
+
+    if (!left && !right) boxman.hspeed = 0;
+
+    if (!up && !down) boxman.vspeed = 0;
+
+    if (dahlepas_inv && inv) {
+        currentScene = 5;
+        dahlepas_inv = false;
+    }*/
 }
 
 // Gerakkan boxman dan crate
@@ -811,15 +963,19 @@ function tulis(text, player, player_x, player_y, NPC) {
         
         // ketengahkan kamera ke character yang bercakap
         if (initWidth / 2 !== ygbercakap.x - vx + 16 || initHeight / 2 !== ygbercakap.y - vy + 16) {
-            cameraCounter = (cameraCounter + 1) % 19; // sineTblBerubah.length === 19
+            cameraCounter = (cameraCounter + 1) % sineTblBerubah_length;
             if (ygbercakap.x - vx + 16 > initWidth / 2) {
-                vx += sineTblBerubah[cameraCounter];
+                if (vx + sineTblBerubah[cameraCounter] <= 416)
+                    vx += sineTblBerubah[cameraCounter];
             } else if (ygbercakap.x - vx + 16 < initWidth / 2) {
-                vx -= sineTblBerubah[cameraCounter];
+                if (vx - sineTblBerubah[cameraCounter] >= 0)
+                    vx -= sineTblBerubah[cameraCounter];
             } else if (ygbercakap.y - vy + 16 > initHeight / 2) {
-                vy += sineTblBerubah[cameraCounter];
+                if (vy + sineTblBerubah[cameraCounter] <= 384)
+                    vy += sineTblBerubah[cameraCounter];
             } else if (ygbercakap.y - vy + 16 < initHeight / 2) {
-                vy -= sineTblBerubah[cameraCounter];
+                if (vy - sineTblBerubah[cameraCounter] >= 0)
+                    vy -= sineTblBerubah[cameraCounter];
             }
         } else {
             cameraCounter = 0;
@@ -1027,15 +1183,51 @@ function scene1() {
 function inventory() {
     'use strict';
     
+    // Nanti tukar guna unit relative supaya
+    // jadi responsive
+    ctx.fillStyle = '#808080';
+    ctx.fillRect(0, 17, 176, 207);
+    
     ctx.fillStyle = '#404040';
+    ctx.fillRect(176, 17, 176, 207);
+    
+    ctx.fillStyle = '#515151';
+    ctx.fillRect(0, 0, game_canvas.width, 17);
+    
+    ctx.fillRect(188, 144, 152, 21);
+    
+    for (var i = 0; i < 4; i++) {
+        for (var j = 0; j < 5; j++) {
+            ctx.fillStyle = '#5B5B5B';
+            ctx.fillRect(12 + 40 * i, 24 + 40 * j, 32, 32);
+        }
+    }
+    
+    ctx.fillRect(188, 24, 152, 112);
+    
+    ctx.fillRect(188, 165, 152, 51);
+    
+    ctx.fillStyle = '#494949';
+    ctx.fillRect(193, 29, 142, 102);
+    
+    /*ctx.fillStyle = '#404040';
     ctx.fillRect(0, 0, 115, game_canvas.height);
     
     ctx.fillStyle = '#515151';
-    ctx.fillRect(115, 0, game_canvas.width - 115, game_canvas.height);
+    ctx.fillRect(115, 0, game_canvas.width - 115, game_canvas.height);*/
+    
+    navigate();
     
     // Tak fleksibel
-    if (inv_arr.length > 0 && inv_arr[0].name === "tangga") {
-        ctx.drawImage(tangga.sprite, 135, 30);
+    if (inv_arr.length > 0 && inv_arr[0] === tangga) {
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(12 + 40 * col, 24 + 40 * row, 32, 32);
+        ctx.fillStyle = '#707070';
+        ctx.fillRect(13 + 40 * col, 25 + 40 * row, 30, 30);
+        ctx.drawImage(tangga.sprite, 12, 24);
+        ctx.drawImage(roti.sprite, 52, 24);
+        ctx.drawImage(kelapa.sprite, 92, 24);
+        select[row][col].describe();
     }
     
     if (dahlepas_inv && inv) {
@@ -1043,6 +1235,26 @@ function inventory() {
         dahlepas_inv = false;
     }
 } //inventory
+
+/*function kedai() {
+    'use strict';
+    
+    ctx.fillStyle = '#404040';
+    ctx.fillRect(0, 0, 115, game_canvas.height);
+    
+    ctx.fillStyle = '#515151';
+    ctx.fillRect(115, 0, game_canvas.width - 115, game_canvas.height);
+    
+    // Tak fleksibel
+    if (inv_arr.length > 0 && inv_arr[0] === tangga) {
+        ctx.drawImage(tangga.sprite, 135, 30);
+    }
+    
+    if (dahlepas_inv && inv) {
+        currentScene = 0;
+        dahlepas_inv = false;
+    }
+} //kedai*/
 
 document.addEventListener('keydown', function (event) {
     switch (event.keyCode) {

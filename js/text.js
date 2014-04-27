@@ -28,7 +28,7 @@ var text = [
             "Nah                  #tangga",
             "Kenapa bagi          @aku?",
             "Saje                 #je",
-            "Err..                @Ok trimas"
+            "Err..                @Terima kasih"
         ],
         [ // 1
             "", // biarkan kosong
@@ -37,7 +37,28 @@ var text = [
             "Yup.                 @BEST GILEE!!!"
         ]
     ],
-]
+    [ //barang-barang
+        [ // 0
+            // tangga
+            "Tangga. Nak terangkan#jugak ke?",
+            
+            // Roti
+            "Roti dewan makan.    #Pulihkan 50 HP",
+            
+            // Kelapa
+            "Segar dari ladang.   #Pulihkan 80 HP",
+            
+            // Kelapa2
+            "Segar dari ladang.222#Pulihkan 80 HP",
+            
+            // Kelapa3
+            "Segar dari ladang.333#Pulihkan 80 HP",
+            
+            // Kelapa4
+            "Segar dari ladang.444#Pulihkan 80 HP"
+        ]
+    ]
+];
 
 
 
