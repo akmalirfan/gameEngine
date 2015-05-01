@@ -101,7 +101,7 @@ for (i = 1; i <= 9; i++) {
 
 sineTblBerubah_length = sineTblBerubah.length;
 
-/* Constructor */
+/*// Entity object
 function Entity() {
     'use strict';
     this.x;
@@ -109,8 +109,36 @@ function Entity() {
     this.hspeed = 0;
     this.vspeed = 0;
     this.inView = false;
+}*/
+
+// Entity object
+function Entity() {
+    private:
+        this.x;
+        this.y;
+        this.hspeed = 0;
+        this.vspeed = 0;
+        this.inView = false;
+    public:
+        // Getters
+        this.getX = function() {
+            return this.x;
+        }
+        this.getY = function() {
+            return this.y;
+        }
+        this.getHSpeed = function() {
+            return this.hspeed;
+        }
+        this.getVSpeed = function() {
+            return this.vspeed;
+        }
+        this.getInView = function() {
+            return this.inView;
+        }
 }
 
+/*// Character object, derived from Entity
 function Character(img_src, textID) {
     'use strict';
     this.sprite = new Image();
@@ -119,7 +147,7 @@ function Character(img_src, textID) {
     this.arah_ver = 0; // 0(bawah) 1(atas)
     this.frame_row = 0;
     this.frame_column = 0;
-    this.limiter = 0;
+    this.pelambat = 0;
     this.depth = 0;
     this.textID = textID;
     this.text = 0;
@@ -145,8 +173,46 @@ function Character(img_src, textID) {
     
     this.can_interact = false;
     this.tukar = 0;
+}*/
+
+// Character object, derived from Entity
+function Character(img_src, textID) {
+    'use strict';
+    this.sprite = new Image();
+    if (img_src !== null) this.sprite.src = img_src;
+    this.arah_hor = 0; // 0(kanan) 1(kiri) >> nak guna tribool?
+    this.arah_ver = 0; // 0(bawah) 1(atas)
+    this.frame_row = 0;
+    this.frame_column = 0;
+    this.pelambat = 0;
+    this.depth = 0;
+    this.textID = textID;
+    this.text = 0;
+    this.draw = function() {
+        //drawImage(image,sx,sy,sw,sh,dx,dy,dw,dh)
+        if (img_src !== null) {
+            ctx.drawImage(
+                    this.sprite,
+                    this.frame_column * 32,
+                    this.frame_row * 32,
+                    32,
+                    32,
+                    this.getX() - vx,
+                    this.getY() - vy,
+                    32,
+                    32
+            );
+        }
+    };
+    
+    /// BERKAITAN CHAT ENGINE ///
+    this.legap = 0;
+    
+    this.can_interact = false;
+    this.tukar = 0;
 }
 
+// Inherits from Entity
 Character.prototype = new Entity();
 
 // Item constructor
@@ -693,16 +759,16 @@ function boxmanAnimate(box_x, box_y) {
     'use strict';
     if (box_x !== boxman.x) { // Kalau kedudukan berubah
         boxman.frame_column = 0;
-        if (boxman.limiter === 0) {
+        if (boxman.pelambat === 0) {
             boxman.frame_row = 4 * boxman.arah_hor + (boxman.frame_row + 1) % 4;
         }
-        boxman.limiter = (boxman.limiter + 1) % 4;
+        boxman.pelambat = (boxman.pelambat + 1) % 4;
     } else if (box_y !== boxman.y) { // Kalau kedudukan berubah
         boxman.frame_column = 1;
-        if (boxman.limiter === 0) {
+        if (boxman.pelambat === 0) {
             boxman.frame_row = 4 * boxman.arah_ver + (boxman.frame_row + 1) % 4;
         }
-        boxman.limiter = (boxman.limiter + 1) % 4;
+        boxman.pelambat = (boxman.pelambat + 1) % 4;
     }/* else { // Kalau stay (macam tak perlu)
         boxman.frame_row = 0 + 4 * boxman.arah_hor;
     }*/
@@ -1029,10 +1095,6 @@ function gameLoop() {
         canvas.style.top = window.innerHeight / 2 - canvas.height / 2 + 'px';
         
         ctx.imageSmoothingEnabled = false;
-        ctx.mozImageSmoothingEnabled = false;
-        ctx.oImageSmoothingEnabled = false;
-        ctx.webkitImageSmoothingEnabled = false;
-        ctx.msImageSmoothingEnabled = false;
         
         ctx.scale(scale, scale);
         
