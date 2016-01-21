@@ -69,6 +69,7 @@ var interval = 1000 / 60,
     /* Variables untuk dialog */
     //can_interact = false,
     typeface = new Image(),
+    typefacew = new Image(),
     sdgcakap = false,
     bekas = [[],[]],
     panjang_teks = 0,
@@ -78,12 +79,13 @@ var interval = 1000 / 60,
     char_width = 6,
     char_height = 11,
     
-    game_canvas = document.getElementById('canvas'),
     ctx = canvas.getContext('2d');
-    
+
+typefacew.src = "./img/gohufont_spritew.png";
+
 // Kira siap-siap, masukkan dalam table
 for (i = 0, j = 0; i <= 90; i += 10, j++) {
-    sineTable[j] = Math.round(Math.sin(i / 180 * Math.PI) * 32);
+  sineTable[j] = Math.round(Math.sin(i / 180 * Math.PI) * 32);
 }
 
 sineTblBerubah[0] = 0;
@@ -104,8 +106,8 @@ sineTblBerubah_length = sineTblBerubah.length;
 /*// Entity object
 function Entity() {
     'use strict';
-    this.x;
-    this.y;
+    this.getX();
+    this.getY();
     this.hspeed = 0;
     this.vspeed = 0;
     this.inView = false;
@@ -113,69 +115,49 @@ function Entity() {
 
 // Entity object
 function Entity() {
-    private:
-        this.x;
-        this.y;
-        this.hspeed = 0;
-        this.vspeed = 0;
-        this.inView = false;
-    public:
-        // Getters
-        this.getX = function() {
-            return this.x;
-        }
-        this.getY = function() {
-            return this.y;
-        }
-        this.getHSpeed = function() {
-            return this.hspeed;
-        }
-        this.getVSpeed = function() {
-            return this.vspeed;
-        }
-        this.getInView = function() {
-            return this.inView;
-        }
+    // Private variables
+    var x,
+        y,
+        hspeed = 0,
+        vspeed = 0,
+        inView = false;
+    
+    // Getters
+    this.getX = function() {
+        return x;
+    }
+    this.getY = function() {
+        return y;
+    }
+    this.getHSpeed = function() {
+        return hspeed;
+    }
+    this.getVSpeed = function() {
+        return vspeed;
+    }
+    this.getInView = function() {
+        return inView;
+    }
+    
+    // Setters
+    this.setX = function(X) {
+        x = X;
+    }
+    this.setY = function(Y) {
+        y = Y;
+    }
+    this.setHSpeed = function(hs) {
+        hspeed = hs;
+    }
+    this.setVSpeed = function(vs) {
+        vspeed = vs;
+    }
+    this.setInView = function(iv) {
+        inView = iv;
+    }
 }
 
 /*// Character object, derived from Entity
-function Character(img_src, textID) {
-    'use strict';
-    this.sprite = new Image();
-    if (img_src !== null) this.sprite.src = img_src;
-    this.arah_hor = 0; // 0(kanan) 1(kiri) >> nak guna tribool?
-    this.arah_ver = 0; // 0(bawah) 1(atas)
-    this.frame_row = 0;
-    this.frame_column = 0;
-    this.pelambat = 0;
-    this.depth = 0;
-    this.textID = textID;
-    this.text = 0;
-    this.draw = function() {
-        //drawImage(image,sx,sy,sw,sh,dx,dy,dw,dh)
-        if (img_src !== null) {
-            ctx.drawImage(
-                    this.sprite,
-                    this.frame_column * 32,
-                    this.frame_row * 32,
-                    32,
-                    32,
-                    this.x - vx,
-                    this.y - vy,
-                    32,
-                    32
-            );
-        }
-    };
-    
-    /// BERKAITAN CHAT ENGINE ///
-    this.legap = 0;
-    
-    this.can_interact = false;
-    this.tukar = 0;
-}*/
-
-// Character object, derived from Entity
 function Character(img_src, textID) {
     'use strict';
     this.sprite = new Image();
@@ -210,10 +192,82 @@ function Character(img_src, textID) {
     
     this.can_interact = false;
     this.tukar = 0;
+}*/
+
+// Character object, derived from Entity
+function Character(img_src, textID) {
+  'use strict';
+  //var Char = Object.create(Entity);
+  var Char = new Entity();
+  
+  Char.sprite = new Image();
+  if (img_src !== null) Char.sprite.src = img_src;
+  Char.arah_hor = 0; // 0(kanan) 1(kiri) >> nak guna tribool?
+  Char.arah_ver = 0; // 0(bawah) 1(atas)
+  Char.frame_row = 0;
+  Char.frame_column = 0;
+  Char.pelambat = 0;
+  Char.depth = 0;
+  Char.textID = textID;
+  Char.text = 0;
+  Char.draw = function() {
+    //drawImage(image,sx,sy,sw,sh,dx,dy,dw,dh)
+    if (img_src !== null) {
+      //console.log(img_src, this.getX());
+      ctx.drawImage(
+        Char.sprite,
+        Char.frame_column * 32,
+        Char.frame_row * 32,
+        32,
+        32,
+        Char.getX() - vx,
+        Char.getY() - vy,
+        32,
+        32
+      );
+    }
+  };
+
+  /// BERKAITAN CHAT ENGINE ///
+  Char.legap = 0;
+
+  Char.can_interact = false;
+  Char.tukar = 0;
+  
+  return Char;
 }
 
 // Inherits from Entity
-Character.prototype = new Entity();
+//Character.prototype = new Entity();
+//Character = Object.create(Entity);
+
+/*var Character = function(img_src, textID) {
+  var Char = Object.create(Character);
+  
+  Char.sprite = new Image();
+  if (img_src !== null) Char.sprite.src = img_src;
+  Char.textID = textID;
+  
+  Char.draw = function() {
+    //drawImage(image,sx,sy,sw,sh,dx,dy,dw,dh)
+    if (img_src !== null) {
+      //console.log(img_src, this.getX());
+      ctx.drawImage(
+        Char.sprite,
+        Char.frame_column * 32,
+        Char.frame_row * 32,
+        32,
+        32,
+        Char.getX() - vx,
+        Char.getY() - vy,
+        32,
+        32
+      );
+    }
+  };
+  
+  return Char;
+};*/
 
 // Item constructor
 function Item(img_src, name, textID, price) {
@@ -230,7 +284,7 @@ function Item(img_src, name, textID, price) {
         for (var i = 0; i < this.name.length; i++) {
             //drawImage(image,sx,sy,sw,sh,dx,dy,dw,dh)
             ctx.drawImage(
-                typeface,
+                typefacew,
                 (this.name.charCodeAt(i) - 32) * char_width,
                 0,
                 char_width,
@@ -244,7 +298,7 @@ function Item(img_src, name, textID, price) {
         for (var i = 0; i < 21; i++) {
             //drawImage(image,sx,sy,sw,sh,dx,dy,dw,dh)
             ctx.drawImage(
-                typeface,
+                typefacew,
                 (text[3][0][this.textID].charCodeAt(i) - 32) * char_width,
                 0,
                 char_width,
@@ -259,7 +313,7 @@ function Item(img_src, name, textID, price) {
         for (var i = 22; i < desc_length; i++) {
             //drawImage(image,sx,sy,sw,sh,dx,dy,dw,dh)
             ctx.drawImage(
-                typeface,
+                typefacew,
                 (text[3][0][this.textID].charCodeAt(i) - 32) * char_width,
                 0,
                 char_width,
@@ -279,11 +333,6 @@ var tangga = new Item("./img/tangga.png", "Tangga", 0, 20),
     kelapa2 = new Item("./img/kelapa.png", "Kelapa2", 2, 10);
     kelapa3 = new Item("./img/kelapa.png", "Kelapa3", 2, 10);
     kelapa4 = new Item("./img/kelapa.png", "Kelapa4", 2, 10);
-
-var select = [
-    [tangga, roti, kelapa],
-    [kelapa2, kelapa3, kelapa4]
-];
 
 // Masukkan barang dalam inventory
 function masuk(item) {
@@ -311,7 +360,7 @@ function masuk(item) {
 
 var entArray = [
     // Main character
-    boxman = new Character("./img/mainChar.png", null),
+    boxman =  Character("./img/mainChar.png", null),
     
     // Invisible walls
     invWalls1 = new Entity(),
@@ -438,58 +487,58 @@ function gotoScene(scene) {
         
         entArray2 = entArray.slice(1);
         
-        boxman.x = 160;
-        boxman.y = 96;
+        boxman.setX(160);
+        boxman.setY(96);
         
-        monstak.x = 224;
-        monstak.y = 96;
+        monstak.setX(224);
+        monstak.setY(96);
         
-        boxbiru.x = 224;
-        boxbiru.y = 256;
+        boxbiru.setX(224);
+        boxbiru.setY(256);
         
-        kk.x = 512;
-        kk.y = 128;
+        kk.setX(512);
+        kk.setY(128);
         
-        crate.x = 128;
-        crate.y = 128;
+        crate.setX(128);
+        crate.setY(128);
         
         // Invisible walls
-        invWalls1.x = 64;
-        invWalls1.y = 256;
-        invWalls2.x = 96;
-        invWalls2.y = 256;
-        invWalls3.x = 128;
-        invWalls3.y = 256;
-        invWalls4.x = 160;
-        invWalls4.y = 256;
-        invWalls5.x = 192;
-        invWalls5.y = 256;
+        invWalls1.setX(64);
+        invWalls1.setY(256);
+        invWalls2.setX(96);
+        invWalls2.setY(256);
+        invWalls3.setX(128);
+        invWalls3.setY(256);
+        invWalls4.setX(160);
+        invWalls4.setY(256);
+        invWalls5.setX(192);
+        invWalls5.setY(256);
         
-        invWalls6.x = 64;
-        invWalls6.y = 288;
-        invWalls7.x = 192;
-        invWalls7.y = 288;
+        invWalls6.setX(64);
+        invWalls6.setY(288);
+        invWalls7.setX(192);
+        invWalls7.setY(288);
         
-        invWalls8.x = 64;
-        invWalls8.y = 320;
-        invWalls9.x = 192;
-        invWalls9.y = 320;
+        invWalls8.setX(64);
+        invWalls8.setY(320);
+        invWalls9.setX(192);
+        invWalls9.setY(320);
         
-        invWalls10.x = 64;
-        invWalls10.y = 352;
-        invWalls11.x = 192;
-        invWalls11.y = 352;
+        invWalls10.setX(64);
+        invWalls10.setY(352);
+        invWalls11.setX(192);
+        invWalls11.setY(352);
         
-        invWalls12.x = 64;
-        invWalls12.y = 384;
-        invWalls13.x = 96;
-        invWalls13.y = 384;
-        invWalls14.x = 128;
-        invWalls14.y = 384;
-        invWalls15.x = 160;
-        invWalls15.y = 384;
-        invWalls16.x = 192;
-        invWalls16.y = 384;
+        invWalls12.setX(64);
+        invWalls12.setY(384);
+        invWalls13.setX(96);
+        invWalls13.setY(384);
+        invWalls14.setX(128);
+        invWalls14.setY(384);
+        invWalls15.setX(160);
+        invWalls15.setY(384);
+        invWalls16.setX(192);
+        invWalls16.setY(384);
     } else if (scene === 1) {
         entArray = [
             boxman,
@@ -498,11 +547,11 @@ function gotoScene(scene) {
         
         entArray2 = entArray.slice(1);
         
-        boxman.x = 160;
-        boxman.y = 96;
+        boxman.setX(160);
+        boxman.setY(96);
         
-        crate.x = 128;
-        crate.y = 128;
+        crate.setX(128);
+        crate.setY(128);
     }
 }
 
@@ -529,6 +578,7 @@ function drawTiles(row, column, scene, layer, tileset) {
 // Function untuk draw watak ikut depth
 function drawCharacters() {
     'use strict';
+    //console.log("Drawing characters");
     var entArray_length = entArray.length;
     
     /* Susun entities ikut depth */
@@ -539,16 +589,17 @@ function drawCharacters() {
     // Lukis ikut turutan
     for (var i = 0; i < entArray_length; i++) {
         if (entArray[i] !== undefined) {
-            if (entArray[i].x-vx >= -32
-                && entArray[i].x-vx < game_canvas.width
-                && entArray[i].y-vy >= -32
-                && entArray[i].y-vy < game_canvas.height) {
-                entArray[i].inView = true;
-                if (entArray[i] instanceof Character) {
+            if (entArray[i].getX()-vx >= -32
+                && entArray[i].getX()-vx < canvas.width
+                && entArray[i].getY()-vy >= -32
+                && entArray[i].getY()-vy < canvas.height) {
+                entArray[i].setInView(true);
+                //if (entArray[i] instanceof Character) {
+                if (entArray[i].draw !== undefined) {
                     entArray[i].draw();
                 }
             } else {
-                entArray[i].inView = false;
+                entArray[i].setInView(false);
             }
         }
     }
@@ -557,7 +608,7 @@ function drawCharacters() {
 function movements() {
     'use strict';
     // If alligned to grid
-    if (boxman.x % 32 === 0 && boxman.y % 32 === 0) {
+    if (boxman.getX() % 32 === 0 && boxman.getY() % 32 === 0) {
         alligned = true;
         
         if (up) {
@@ -586,27 +637,27 @@ function movements() {
         
         if (!up && !down) { // disable diagonal movements
             if (left) {
-                boxman.hspeed = -2;
+                boxman.setHSpeed(-2);
             }
             
             if (right) {
-                boxman.hspeed = 2;
+                boxman.setHSpeed(2);
             }
         }
         
         if (!left && !right) { // disable diagonal movements
             if (up) {
-                boxman.vspeed = -2;
+                boxman.setVSpeed(-2);
             }
             
             if (down) {
-                boxman.vspeed = 2;
+                boxman.setVSpeed(2);
             }
         }
         
-        if (!left && !right) boxman.hspeed = 0;
+        if (!left && !right) boxman.setHSpeed(0);
         
-        if (!up && !down) boxman.vspeed = 0;
+        if (!up && !down) boxman.setVSpeed(0);
         
         if (dahlepas_inv && inv) {
             currentScene = 5;
@@ -637,7 +688,7 @@ function navigate() {
         // Row
         if (up) {
             if (row === 0) {
-                row = 1;
+                row = 4;
             } else {
                 row -= 1;
             }
@@ -645,14 +696,14 @@ function navigate() {
         }
 
         if (down) {
-            row = (row + 1) % 2;
+            row = (row + 1) % 5;
             boleh_tekan = false;
         }
         
         // Column
         if (left) {
             if (col === 0) {
-                col = 2;
+                col = 3;
             } else {
                 col -= 1;
             }
@@ -660,36 +711,45 @@ function navigate() {
         }
 
         if (right) {
-            col = (col + 1) % 3;
+            col = (col + 1) % 4;
             boleh_tekan = false;
         }
     }
     
     if (!(up || down || left || right)) boleh_tekan = true;
+    
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(12 + 40 * col, 24 + 40 * row, 32, 32);
+    ctx.fillStyle = '#707070';
+    ctx.fillRect(13 + 40 * col, 25 + 40 * row, 30, 30);
+    
+    if (inv_arr[col + row * 4] !== undefined) {
+        inv_arr[col + row * 4].describe();
+    }
 /*
     if (!up && !down) { // disable diagonal movements
         if (left) {
-            boxman.hspeed = -2;
+            boxman.setHSpeed(-2);
         }
 
         if (right) {
-            boxman.hspeed = 2;
+            boxman.setHSpeed(2);
         }
     }
 
     if (!left && !right) { // disable diagonal movements
         if (up) {
-            boxman.vspeed = -2;
+            boxman.setVSpeed(-2);
         }
 
         if (down) {
-            boxman.vspeed = 2;
+            boxman.setVSpeed(2);
         }
     }
 
-    if (!left && !right) boxman.hspeed = 0;
+    if (!left && !right) boxman.setHSpeed(0);
 
-    if (!up && !down) boxman.vspeed = 0;
+    if (!up && !down) boxman.setVSpeed(0);
 
     if (dahlepas_inv && inv) {
         currentScene = 5;
@@ -700,70 +760,73 @@ function navigate() {
 // Gerakkan boxman dan crate
 function motion() {
     'use strict';
-    if (boxman.hspeed > 0) {
+    if (boxman.getHSpeed() > 0) {
         if (!collisionR) {
-            if (crate.x === boxman.x + 32 && crate.y === boxman.y) {
-                if (!collisionR2) boxman.x += boxman.hspeed / 2;
+            if (crate.getX() === boxman.getX() + 32 && crate.getY() === boxman.getY()) {
+                if (!collisionR2) boxman.setX(boxman.getX() + boxman.getHSpeed() / 2);
             } else {
-                boxman.x += boxman.hspeed;
+                boxman.setX(boxman.getX() + boxman.getHSpeed());
             }
         }
         
         if (!collisionR2
             && crate.can_interact
-            && crate.x > boxman.x
-            && crate.x + boxman.hspeed > boxman.x) crate.x += boxman.hspeed / 2;
-    } else if (boxman.hspeed < 0) {
+            && crate.getX() > boxman.getX()
+            && crate.getX() + boxman.getHSpeed() > boxman.getX()) crate.setX(crate.getX() + boxman.getHSpeed() / 2);
+    } else if (boxman.getHSpeed() < 0) {
         if (!collisionL) {
-            if (crate.x === boxman.x - 32 && crate.y === boxman.y) {
-                if (!collisionL2) boxman.x += boxman.hspeed / 2;
+            if (crate.getX() === boxman.getX() - 32 && crate.getY() === boxman.getY()) {
+                if (!collisionL2) boxman.setX(boxman.getX() + boxman.getHSpeed() / 2);
             } else {
-                boxman.x += boxman.hspeed;
+                boxman.setX(boxman.getX() + boxman.getHSpeed());
             }
         }
         if (!collisionL2
             && crate.can_interact
-            && crate.x < boxman.x
-            && crate.x + boxman.hspeed < boxman.x) crate.x += boxman.hspeed / 2;
+            && crate.getX() < boxman.getX()
+            && crate.getX() + boxman.getHSpeed() < boxman.getX()) crate.setX(crate.getX() + boxman.getHSpeed() / 2);
     }
     //////////////////////////////////////////
-    if (boxman.vspeed > 0) {
+    if (boxman.getVSpeed() > 0) {
         if (!collisionD) {
-            if (crate.y === boxman.y + 32 && crate.x === boxman.x) {
-                if (!collisionD2) boxman.y += boxman.vspeed / 2;
+            if (crate.getY() === boxman.getY() + 32 && crate.getX() === boxman.getX()) {
+                if (!collisionD2) boxman.setY(boxman.getY() + boxman.getVSpeed() / 2);
             } else {
-                boxman.y += boxman.vspeed;
+                boxman.setY(boxman.getY() + boxman.getVSpeed());
             }
         }
         if (!collisionD2
             && crate.can_interact
-            && crate.y > boxman.y
-            && crate.y + boxman.vspeed > boxman.y) crate.y += boxman.vspeed / 2;
-    } else if (boxman.vspeed < 0) {
+            && crate.getY() > boxman.getY()
+            && crate.getY() + boxman.getVSpeed() > boxman.getY()) crate.setY(crate.getY() + boxman.getVSpeed() / 2);
+    } else if (boxman.getVSpeed() < 0) {
         if (!collisionU) {
-            if (crate.y === boxman.y - 32 && crate.x === boxman.x) {
-                if (!collisionU2) boxman.y += boxman.vspeed / 2;
+            if (crate.getY() === boxman.getY() - 32 && crate.getX() === boxman.getX()) {
+                if (!collisionU2) boxman.setY(boxman.getY() + boxman.getVSpeed() / 2);
             } else {
-                boxman.y += boxman.vspeed;
+                boxman.setY(boxman.getY() + boxman.getVSpeed());
             }
         }
         if (!collisionU2
             && crate.can_interact
-            && crate.y < boxman.y
-            && crate.y + boxman.vspeed < boxman.y) crate.y += boxman.vspeed / 2;
+            && crate.getY() < boxman.getY()
+            && crate.getY() + boxman.getVSpeed() < boxman.getY()) {
+            //
+            crate.setY(crate.getY() + boxman.getVSpeed() / 2);
+        }
     }
 }
 
 //Animasi untuk boxman
 function boxmanAnimate(box_x, box_y) {
     'use strict';
-    if (box_x !== boxman.x) { // Kalau kedudukan berubah
+    if (box_x !== boxman.getX()) { // Kalau kedudukan berubah
         boxman.frame_column = 0;
         if (boxman.pelambat === 0) {
             boxman.frame_row = 4 * boxman.arah_hor + (boxman.frame_row + 1) % 4;
         }
         boxman.pelambat = (boxman.pelambat + 1) % 4;
-    } else if (box_y !== boxman.y) { // Kalau kedudukan berubah
+    } else if (box_y !== boxman.getY()) { // Kalau kedudukan berubah
         boxman.frame_column = 1;
         if (boxman.pelambat === 0) {
             boxman.frame_row = 4 * boxman.arah_ver + (boxman.frame_row + 1) % 4;
@@ -779,16 +842,16 @@ function collisionCheck(box_x, box_y) {
     var entArray2_length = entArray2.length;
     for (var ent = 0; ent < entArray2_length; ent++) {
         // Uji jarak boleh bercakap
-        if (((boxman.x === entArray2[ent].x-32 || boxman.x === entArray2[ent].x+32)
-            && (boxman.y === entArray2[ent].y))
-            || ((boxman.x === entArray2[ent].x)
-            && (boxman.y === entArray2[ent].y-32 || boxman.y === entArray2[ent].y+32))) {
+        if (((boxman.getX() === entArray2[ent].getX()-32 || boxman.getX() === entArray2[ent].getX()+32)
+            && (boxman.getY() === entArray2[ent].getY()))
+            || ((boxman.getX() === entArray2[ent].getX())
+            && (boxman.getY() === entArray2[ent].getY()-32 || boxman.getY() === entArray2[ent].getY()+32))) {
             entArray2[ent].can_interact = true;
             if (entArray2[ent] !== crate) // coba
                 enpisi = entArray2[ent];
             if (enpisi !== undefined
                 && enpisi.textID !== null
-                && enpisi instanceof Character) {
+                && enpisi.textID !== undefined) {
                 tulis(
                     text[enpisi.textID][enpisi.text],
                     boxman,
@@ -802,25 +865,25 @@ function collisionCheck(box_x, box_y) {
         }
         
         // Uji collision
-        if (entArray2[ent].inView && entArray2[ent] !== crate) {
-            if (entArray2[ent].y === boxman.y) {
-                if (entArray2[ent].x === boxman.x - 32) {
+        if (entArray2[ent].getInView() && entArray2[ent] !== crate) {
+            if (entArray2[ent].getY() === boxman.getY()) {
+                if (entArray2[ent].getX() === boxman.getX() - 32) {
                     collisionL = true;
-                } else if (entArray2[ent].x === boxman.x - 64) {
+                } else if (entArray2[ent].getX() === boxman.getX() - 64) {
                     collisionL2 = true;
-                } else if (entArray2[ent].x === boxman.x + 32) {
+                } else if (entArray2[ent].getX() === boxman.getX() + 32) {
                     collisionR = true;
-                } else if (entArray2[ent].x === boxman.x + 64) {
+                } else if (entArray2[ent].getX() === boxman.getX() + 64) {
                     collisionR2 = true;
                 }
-            } else if (entArray2[ent].x === boxman.x) {
-                if (entArray2[ent].y === boxman.y - 32) {
+            } else if (entArray2[ent].getX() === boxman.getX()) {
+                if (entArray2[ent].getY() === boxman.getY() - 32) {
                     collisionU = true;
-                } else if (entArray2[ent].y === boxman.y - 64) {
+                } else if (entArray2[ent].getY() === boxman.getY() - 64) {
                     collisionU2 = true;
-                } else if (entArray2[ent].y === boxman.y + 32) {
+                } else if (entArray2[ent].getY() === boxman.getY() + 32) {
                     collisionD = true;
-                } else if (entArray2[ent].y === boxman.y + 64) {
+                } else if (entArray2[ent].getY() === boxman.getY() + 64) {
                     collisionD2 = true;
                 }
             }
@@ -831,7 +894,7 @@ function collisionCheck(box_x, box_y) {
 function drawTextbox(player, NPC, ygbercakap_x, ygbercakap_y, text_width) {
     var x1, y1, x2, y2;
     
-    if (player.x !== NPC.x) {
+    if (player.getX() !== NPC.getX()) {
         if (NPC.tukar !== 0) {
             x1 = ygbercakap_x - vx + 16 - (text_width / 2 + 10);
             y1 = ygbercakap_y - vy - 57;
@@ -847,10 +910,10 @@ function drawTextbox(player, NPC, ygbercakap_x, ygbercakap_y, text_width) {
             ctx.drawImage(bubble, 40, 0, 10, 44, x2, y1, 10, 44);
             ctx.drawImage(bubble, 20, 42, 10, 7, ygbercakap_x - vx + 11, y2 - 2, 10, 7); // segi tiga
         }
-    } else { // player.x === NPC.x
+    } else { // player.getX() === NPC.getX()
         if (NPC.tukar !== 0) {
-            if ((ygbercakap_y === NPC.y && NPC.y < player.y)
-                || (ygbercakap_y === player.y && NPC.y > player.y)) {
+            if ((ygbercakap_y === NPC.getY() && NPC.getY() < player.getY())
+                || (ygbercakap_y === player.getY() && NPC.getY() > player.getY())) {
                 x1 = ygbercakap_x - vx + 16 - (text_width / 2 + 10);
                 y1 = ygbercakap_y - vy - 57;
                 x2 = ygbercakap_x - vx + 16 + (text_width / 2 + 10);
@@ -901,7 +964,7 @@ function tulis(text, player, player_x, player_y, NPC) {
 	if (NPC.legap > 1) NPC.legap = 1; // hadkan nilai legap
     
     if (!sdgcakap) {
-        if (player.x === player_x && player.y === player_y) { // Kalau kedudukan tak berubah
+        if (player.getX() === player_x && player.getY() === player_y) { // Kalau kedudukan tak berubah
             ctx.fillStyle = 'rgba(255, 255, 255, ' + NPC.legap + ')';
             
             // coba
@@ -913,23 +976,23 @@ function tulis(text, player, player_x, player_y, NPC) {
             
             ygbercakap = player;
             
-            drawTextbox(player, NPC, ygbercakap.x, ygbercakap.y, text_width);
+            drawTextbox(player, NPC, ygbercakap.getX(), ygbercakap.getY(), text_width);
         }
     } else {
         //Tukar sprite player berdasarkan kedudukan NPC
-        if (player.x > NPC.x) {
+        if (player.getX() > NPC.getX()) {
             player.frame_column = 0;
             player.arah_hor = 1;
             boxman.frame_row = 4 * boxman.arah_hor;
-        } else if (player.x < NPC.x) {
+        } else if (player.getX() < NPC.getX()) {
             player.frame_column = 0;
             player.arah_hor = 0;
             boxman.frame_row = 4 * boxman.arah_hor;
-        } else if (player.y > NPC.y) {
+        } else if (player.getY() > NPC.getY()) {
             player.frame_column = 1;
             player.arah_ver = 1;
             boxman.frame_row = 4 * boxman.arah_ver;
-        } else if (player.y < NPC.y) {
+        } else if (player.getY() < NPC.getY()) {
             player.frame_column = 1;
             player.arah_ver = 0;
             boxman.frame_row = 4 * boxman.arah_ver;
@@ -946,22 +1009,22 @@ function tulis(text, player, player_x, player_y, NPC) {
         
         ctx.fillStyle = '#FFF';
         
-        drawTextbox(player, NPC, ygbercakap.x, ygbercakap.y, text_width);
+        drawTextbox(player, NPC, ygbercakap.getX(), ygbercakap.getY(), text_width);
 
         // 'TULIS' //////////////////
         // bekas[0] (baris pertama)
         
-        var string_reg_x = ygbercakap.x - vx + 16 - var_panjang[0] * char_width / 2;
+        var string_reg_x = ygbercakap.getX() - vx + 16 - var_panjang[0] * char_width / 2;
         
-        if (player.x === NPC.x) {
-            if ((ygbercakap === NPC && NPC.y < player.y)
-                || (ygbercakap === player && NPC.y > player.y)) {
-                var string_reg_y = ygbercakap.y - 46; //13 + char_height*3 = 46
+        if (player.getX() === NPC.getX()) {
+            if ((ygbercakap === NPC && NPC.getY() < player.getY())
+                || (ygbercakap === player && NPC.getY() > player.getY())) {
+                var string_reg_y = ygbercakap.getY() - 46; //13 + char_height*3 = 46
             } else {
-                var string_reg_y = ygbercakap.y + 56; //46+32-char_height*2= 56
+                var string_reg_y = ygbercakap.getY() + 56; //46+32-char_height*2= 56
             }
         } else {
-            var string_reg_y = ygbercakap.y - 46; //13 + char_height*3 = 46
+            var string_reg_y = ygbercakap.getY() - 46; //13 + char_height*3 = 46
         }
 
         var i;
@@ -1010,7 +1073,7 @@ function tulis(text, player, player_x, player_y, NPC) {
 
         textToBekas(1, text[NPC.tukar].substring(22, 22 + var_panjang[1]));
         
-        string_reg_x = ygbercakap.x - vx + 16 - var_panjang[1] * char_width / 2;
+        string_reg_x = ygbercakap.getX() - vx + 16 - var_panjang[1] * char_width / 2;
         
         string_reg_y += 11;
         for (i = 0; i < panjang_teks; i++) {
@@ -1028,18 +1091,18 @@ function tulis(text, player, player_x, player_y, NPC) {
         }
         
         // ketengahkan kamera ke character yang bercakap
-        if (initWidth / 2 !== ygbercakap.x - vx + 16 || initHeight / 2 !== ygbercakap.y - vy + 16) {
+        if (initWidth / 2 !== ygbercakap.getX() - vx + 16 || initHeight / 2 !== ygbercakap.getY() - vy + 16) {
             cameraCounter = (cameraCounter + 1) % sineTblBerubah_length;
-            if (ygbercakap.x - vx + 16 > initWidth / 2) {
+            if (ygbercakap.getX() - vx + 16 > initWidth / 2) {
                 if (vx + sineTblBerubah[cameraCounter] <= 416)
                     vx += sineTblBerubah[cameraCounter];
-            } else if (ygbercakap.x - vx + 16 < initWidth / 2) {
+            } else if (ygbercakap.getX() - vx + 16 < initWidth / 2) {
                 if (vx - sineTblBerubah[cameraCounter] >= 0)
                     vx -= sineTblBerubah[cameraCounter];
-            } else if (ygbercakap.y - vy + 16 > initHeight / 2) {
+            } else if (ygbercakap.getY() - vy + 16 > initHeight / 2) {
                 if (vy + sineTblBerubah[cameraCounter] <= 384)
                     vy += sineTblBerubah[cameraCounter];
-            } else if (ygbercakap.y - vy + 16 < initHeight / 2) {
+            } else if (ygbercakap.getY() - vy + 16 < initHeight / 2) {
                 if (vy - sineTblBerubah[cameraCounter] >= 0)
                     vy -= sineTblBerubah[cameraCounter];
             }
@@ -1047,26 +1110,26 @@ function tulis(text, player, player_x, player_y, NPC) {
             cameraCounter = 0;
         }
         
-        /*if (ygbercakap.x - vx + 16 > initWidth / 2) {
-            if (ygbercakap.x - vx + 20 > initWidth / 2) { //16 + 4 = 20
+        /*if (ygbercakap.getX() - vx + 16 > initWidth / 2) {
+            if (ygbercakap.getX() - vx + 20 > initWidth / 2) { //16 + 4 = 20
                 if (vx + 4 <= 416) vx += 4; // 24tiles * 32px = 768
             } else {
                 if (vx + 1 <= 416) vx += 1; // 768 - initWidth
             }
-        } else if (ygbercakap.x - vx + 16 < initWidth / 2) {
-            if (ygbercakap.x - vx + 12 < initWidth / 2) { //16 - 4 = 12
+        } else if (ygbercakap.getX() - vx + 16 < initWidth / 2) {
+            if (ygbercakap.getX() - vx + 12 < initWidth / 2) { //16 - 4 = 12
                 if (vx - 4 >= 0) vx -= 4;
             } else {
                 if (vx - 1 >= 0) vx -= 1;
             }
-        } else if (ygbercakap.y - vy + 16 > initHeight / 2) {
-            if (ygbercakap.y - vy + 20 > initHeight / 2) { //16 + 4 = 20
+        } else if (ygbercakap.getY() - vy + 16 > initHeight / 2) {
+            if (ygbercakap.getY() - vy + 20 > initHeight / 2) { //16 + 4 = 20
                 if (vy + 4 <= 384) vy += 4; // 19tiles * 32px = 608
             } else {
                 if (vy + 1 <= 384) vy += 1; // 608 - initHeight
             }
-        } else if (ygbercakap.y - vy + 16 < initHeight / 2) {
-            if (ygbercakap.y - vy + 12 < initHeight / 2) { //16 - 4 = 12
+        } else if (ygbercakap.getY() - vy + 16 < initHeight / 2) {
+            if (ygbercakap.getY() - vy + 12 < initHeight / 2) { //16 - 4 = 12
                 if (vy - 4 >= 0) vy -= 4;
             } else {
                 if (vy - 1 >= 0) vy -= 1;
@@ -1136,12 +1199,12 @@ function scene0() {
     drawTiles(0, 0, currentScene, 0, tile);
     
     // Tetapkan depth
-    boxman.depth = -boxman.y;
+    boxman.depth = -boxman.getY();
     if (monstak !== undefined) // coba
-        monstak.depth = -monstak.y;
-    boxbiru.depth = -boxbiru.y;
-    kk.depth = -kk.y;
-    crate.depth = -crate.y;
+        monstak.depth = -monstak.getY();
+    boxbiru.depth = -boxbiru.getY();
+    kk.depth = -kk.getY();
+    crate.depth = -crate.getY();
 
     // Draw watak ikut depth
     drawCharacters();
@@ -1154,25 +1217,25 @@ function scene0() {
     // Tukar frame index monstak berdasarkan
     // kedudukan boxman
     if (monstak !== undefined) // coba
-        monstak.frame_row = (boxman.x > monstak.x) ? 0 : 4;
+        monstak.frame_row = (boxman.getX() > monstak.getX()) ? 0 : 4;
     
     // Tukar frame index kk berdasarkan
     // kedudukan boxman
-    kk.frame_row = (boxman.x > kk.x) ? 0 : 1;
+    kk.frame_row = (boxman.getX() > kk.getX()) ? 0 : 1;
     
     if (!sdgcakap) {
         movements();
         
         // Simpan nilai x dan y
-        box_x = boxman.x;
-        box_y = boxman.y;
+        box_x = boxman.getX();
+        box_y = boxman.getY();
         
         // If alligned to grid
         if (alligned) {
             // Uji jarak dan collision
             collisionCheck(box_x, box_y);
             
-            unlock = (crate.x === 32 && crate.y === 32) ? true : false;
+            unlock = (crate.getX() === 32 && crate.getY() === 32) ? true : false;
         }
         
         // Gerakkan boxman dan crate
@@ -1181,13 +1244,13 @@ function scene0() {
         boxmanAnimate(box_x, box_y);
         
         // KAMERA ////////////////////////////
-        if (boxman.x >= 160 && boxman.x <= 576) { // 160 = 352/2 - 16
-            bezaX = boxman.x-vx - 160;
+        if (boxman.getX() >= 160 && boxman.getX() <= 576) { // 160 = 352/2 - 16
+            bezaX = boxman.getX()-vx - 160;
             vx += bezaX;
         }
         
-        if (boxman.y >= 96 && boxman.y <= 480) {
-            bezaY = boxman.y-vy - 96;
+        if (boxman.getY() >= 96 && boxman.getY() <= 480) {
+            bezaY = boxman.getY()-vy - 96;
             vy += bezaY;
         }
         ///////////////////////////////////////
@@ -1219,8 +1282,8 @@ function scene1() {
     drawTiles(0, 0, currentScene, 0, tile);
     
     // Tetapkan depth
-    boxman.depth = -boxman.y;
-    crate.depth = -crate.y;
+    boxman.depth = -boxman.getY();
+    crate.depth = -crate.getY();
 
     // Draw watak ikut depth
     drawCharacters();
@@ -1228,8 +1291,8 @@ function scene1() {
     movements();
     
     // Simpan nilai x dan y
-    box_x = boxman.x;
-    box_y = boxman.y;
+    box_x = boxman.getX();
+    box_y = boxman.getY();
     
     // If alligned to grid
     if (alligned) {
@@ -1254,7 +1317,7 @@ function inventory() {
     ctx.fillRect(176, 17, 176, 207);
     
     ctx.fillStyle = '#515151';
-    ctx.fillRect(0, 0, game_canvas.width, 17);
+    ctx.fillRect(0, 0, canvas.width, 17);
     
     ctx.fillRect(188, 144, 152, 21);
     
@@ -1273,28 +1336,40 @@ function inventory() {
     ctx.fillRect(193, 29, 142, 102);
     
     /*ctx.fillStyle = '#404040';
-    ctx.fillRect(0, 0, 115, game_canvas.height);
+    ctx.fillRect(0, 0, 115, canvas.height);
     
     ctx.fillStyle = '#515151';
-    ctx.fillRect(115, 0, game_canvas.width - 115, game_canvas.height);*/
+    ctx.fillRect(115, 0, canvas.width - 115, canvas.height);*/
     
     navigate();
     
     // Tak fleksibel
-    if (inv_arr.length > 0 && inv_arr[0] === tangga) {
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(12 + 40 * col, 24 + 40 * row, 32, 32);
-        ctx.fillStyle = '#707070';
-        ctx.fillRect(13 + 40 * col, 25 + 40 * row, 30, 30);
+    /*if (inv_arr.length > 0 && inv_arr[0] === tangga) {
         ctx.drawImage(tangga.sprite, 12, 24);
-        ctx.drawImage(roti.sprite, 52, 24);
-        ctx.drawImage(kelapa.sprite, 92, 24);
-        select[row][col].describe();
+        //ctx.drawImage(roti.sprite, 52, 24);
+        //ctx.drawImage(kelapa.sprite, 92, 24);
+    }*/
+    
+    var store_i;
+    var itemrow;
+    for (var i = 0; i < inv_arr.length; i++) {
+        store_i = i;
+        itemrow = 0;
+        
+        while (store_i > 3) {
+            store_i -= 4;
+            itemrow++;
+        }
+        
+        ctx.drawImage(inv_arr[i].sprite, 12 + 40 * (i % 4), 24 + 40 * itemrow);
     }
     
     if (dahlepas_inv && inv) {
         currentScene = 0;
         dahlepas_inv = false;
+        
+        row = 0;
+        col = 0;
     }
 } //inventory
 
@@ -1302,10 +1377,10 @@ function inventory() {
     'use strict';
     
     ctx.fillStyle = '#404040';
-    ctx.fillRect(0, 0, 115, game_canvas.height);
+    ctx.fillRect(0, 0, 115, canvas.height);
     
     ctx.fillStyle = '#515151';
-    ctx.fillRect(115, 0, game_canvas.width - 115, game_canvas.height);
+    ctx.fillRect(115, 0, canvas.width - 115, canvas.height);
     
     // Tak fleksibel
     if (inv_arr.length > 0 && inv_arr[0] === tangga) {
@@ -1329,14 +1404,16 @@ document.addEventListener('keydown', function (event) {
                     if (var_panjang[1] === panjang_teks) {
                         // Kosongkan var_panjang
                         var_panjang = [0,0];
-                        if (enpisi.tukar < text[enpisi.textID][enpisi.text].length - 1) {
-                            enpisi.tukar += 1;
-                        } else {
-                            panjang_teks = 0;
-                            enpisi.tukar = 0;
-                            if (enpisi === kk && kk.text === 0) {
-                                masuk(tangga);
-                                kk.text = 1;
+                        if (enpisi.textID !== undefined) {
+                            if (enpisi.tukar < text[enpisi.textID][enpisi.text].length - 1) {
+                                enpisi.tukar += 1;
+                            } else {
+                                panjang_teks = 0;
+                                enpisi.tukar = 0;
+                                if (enpisi === kk && kk.text === 0) {
+                                    masuk(tangga);
+                                    kk.text = 1;
+                                }
                             }
                         }
                         dahlepas_space = false;
@@ -1388,7 +1465,7 @@ document.addEventListener('keyup', function (event) {
     }
 });
 
-game_canvas.addEventListener('mouseup', function (event) {
+canvas.addEventListener('mouseup', function (event) {
     console.log('asdasd');
 });
 
