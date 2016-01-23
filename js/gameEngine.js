@@ -1,3 +1,5 @@
+// TO-DO: Jadikan resolution 240x160 (GBA)
+
 var interval = 1000 / 60,
     tile = new Image(),
     tile2 = new Image(),
@@ -34,8 +36,6 @@ var interval = 1000 / 60,
     space = false,
     inv = false,
     
-    unlock = false,
-    
     // Guna untuk inventory //
     row = 0,
     col = 0,
@@ -53,7 +53,7 @@ var interval = 1000 / 60,
     enpisi,
     
     // Collision detection
-    alligned = false,
+    aligned = false,
     
     collisionL = false,
     collisionR = false,
@@ -99,19 +99,7 @@ for (i = 1; i <= 9; i++) {
     }
 }
 
-//sineTblBerubah = [0, 6, 6, 5, 5, 4, 2, 2, 2, 0];
-
 sineTblBerubah_length = sineTblBerubah.length;
-
-/*// Entity object
-function Entity() {
-    'use strict';
-    this.getX();
-    this.getY();
-    this.hspeed = 0;
-    this.vspeed = 0;
-    this.inView = false;
-}*/
 
 // Entity object
 function Entity() {
@@ -157,43 +145,6 @@ function Entity() {
     }
 }
 
-/*// Character object, derived from Entity
-function Character(img_src, textID) {
-    'use strict';
-    this.sprite = new Image();
-    if (img_src !== null) this.sprite.src = img_src;
-    this.arah_hor = 0; // 0(kanan) 1(kiri) >> nak guna tribool?
-    this.arah_ver = 0; // 0(bawah) 1(atas)
-    this.frame_row = 0;
-    this.frame_column = 0;
-    this.pelambat = 0;
-    this.depth = 0;
-    this.textID = textID;
-    this.text = 0;
-    this.draw = function() {
-        //drawImage(image,sx,sy,sw,sh,dx,dy,dw,dh)
-        if (img_src !== null) {
-            ctx.drawImage(
-                    this.sprite,
-                    this.frame_column * 32,
-                    this.frame_row * 32,
-                    32,
-                    32,
-                    this.getX() - vx,
-                    this.getY() - vy,
-                    32,
-                    32
-            );
-        }
-    };
-    
-    /// BERKAITAN CHAT ENGINE ///
-    this.legap = 0;
-    
-    this.can_interact = false;
-    this.tukar = 0;
-}*/
-
 // Character object, derived from Entity
 function Character(img_src, textID) {
   'use strict';
@@ -237,44 +188,13 @@ function Character(img_src, textID) {
   return Char;
 }
 
-// Inherits from Entity
-//Character.prototype = new Entity();
-//Character = Object.create(Entity);
-
-/*var Character = function(img_src, textID) {
-  var Char = Object.create(Character);
-  
-  Char.sprite = new Image();
-  if (img_src !== null) Char.sprite.src = img_src;
-  Char.textID = textID;
-  
-  Char.draw = function() {
-    //drawImage(image,sx,sy,sw,sh,dx,dy,dw,dh)
-    if (img_src !== null) {
-      //console.log(img_src, this.getX());
-      ctx.drawImage(
-        Char.sprite,
-        Char.frame_column * 32,
-        Char.frame_row * 32,
-        32,
-        32,
-        Char.getX() - vx,
-        Char.getY() - vy,
-        32,
-        32
-      );
-    }
-  };
-  
-  return Char;
-};*/
-
 // Item constructor
-function Item(img_src, name, textID, price) {
+function Item(img_src, name, stackable, textID, price) {
     'use strict';
     this.sprite = new Image();
     this.sprite.src = img_src;
     this.name = name;
+    this.stackable = stackable;
     this.textID = textID;
     this.price = price;
     this.describe = function() {
@@ -326,13 +246,13 @@ function Item(img_src, name, textID, price) {
     }
 }
 
-// Barang-barang dalam inventory
-var tangga = new Item("./img/tangga.png", "Tangga", 0, 20),
-    roti = new Item("./img/roti.png", "Roti", 1, 5),
-    kelapa = new Item("./img/kelapa.png", "Kelapa", 2, 10);
-    kelapa2 = new Item("./img/kelapa.png", "Kelapa2", 2, 10);
-    kelapa3 = new Item("./img/kelapa.png", "Kelapa3", 2, 10);
-    kelapa4 = new Item("./img/kelapa.png", "Kelapa4", 2, 10);
+// Barang-barang
+var tangga = new Item("./img/tangga.png", "Tangga", false, 0, 20),
+    roti = new Item("./img/roti.png", "Roti", true, 1, 5),
+    kelapa = new Item("./img/kelapa.png", "Kelapa", true, 2, 10);
+    kelapa2 = new Item("./img/kelapa.png", "Kelapa2", true, 2, 10);
+    kelapa3 = new Item("./img/kelapa.png", "Kelapa3", true, 2, 10);
+    kelapa4 = new Item("./img/kelapa.png", "Kelapa4", true, 2, 10);
 
 // Masukkan barang dalam inventory
 function masuk(item) {
@@ -347,10 +267,11 @@ function masuk(item) {
         if (inv_arr[i] === item) {
             had = true;
             index = i;
+            break;
         }
     }
     
-    if (had) {
+    if (had && inv_arr[index].stackable) {
         inv_arrQty[index]++;
     } else {
         inv_arr.push(item);
@@ -529,7 +450,7 @@ function gotoScene(scene) {
         invWalls11.setX(192);
         invWalls11.setY(352);
         
-        invWalls12.setX(64);
+        /*invWalls12.setX(64);
         invWalls12.setY(384);
         invWalls13.setX(96);
         invWalls13.setY(384);
@@ -538,7 +459,14 @@ function gotoScene(scene) {
         invWalls15.setX(160);
         invWalls15.setY(384);
         invWalls16.setX(192);
-        invWalls16.setY(384);
+        invWalls16.setY(384);*/
+        
+        invWalls13.setX(96);
+        invWalls13.setY(352);
+        invWalls14.setX(128);
+        invWalls14.setY(352);
+        invWalls15.setX(160);
+        invWalls15.setY(352);
     } else if (scene === 1) {
         entArray = [
             boxman,
@@ -575,41 +503,47 @@ function drawTiles(row, column, scene, layer, tileset) {
     }
 }
 
+// Copy of entArray
+var entArraySorted = entArray.slice();
+
 // Function untuk draw watak ikut depth
 function drawCharacters() {
     'use strict';
-    //console.log("Drawing characters");
     var entArray_length = entArray.length;
     
-    /* Susun entities ikut depth */
-    entArray.sort(function(a, b) {
+    // Buang entity yang tak perlu draw
+    for (var i = 0; i < entArraySorted.length; i++) {
+        if (entArraySorted[i].depth === undefined) {
+            entArraySorted.splice(i, 1);
+        }
+    }
+    
+    var entArraySorted_length = entArraySorted.length;
+    
+    // Susun entities ikut depth
+    entArraySorted.sort(function(a, b) {
         return b.depth - a.depth;
     });
     
     // Lukis ikut turutan
-    for (var i = 0; i < entArray_length; i++) {
-        if (entArray[i] !== undefined) {
-            if (entArray[i].getX()-vx >= -32
-                && entArray[i].getX()-vx < canvas.width
-                && entArray[i].getY()-vy >= -32
-                && entArray[i].getY()-vy < canvas.height) {
-                entArray[i].setInView(true);
-                //if (entArray[i] instanceof Character) {
-                if (entArray[i].draw !== undefined) {
-                    entArray[i].draw();
-                }
-            } else {
-                entArray[i].setInView(false);
-            }
+    for (var i = 0; i < entArraySorted_length; i++) {
+        if (entArraySorted[i].getX()-vx >= -32
+            && entArraySorted[i].getX()-vx < initWidth
+            && entArraySorted[i].getY()-vy >= -32
+            && entArraySorted[i].getY()-vy < initHeight) {
+            entArraySorted[i].setInView(true);
+            entArraySorted[i].draw();
+        } else {
+            entArraySorted[i].setInView(false);
         }
     }
 }
 
 function movements() {
     'use strict';
-    // If alligned to grid
+    // If aligned to grid
     if (boxman.getX() % 32 === 0 && boxman.getY() % 32 === 0) {
-        alligned = true;
+        aligned = true;
         
         if (up) {
             boxman.frame_column = 1;
@@ -664,55 +598,41 @@ function movements() {
             dahlepas_inv = false;
         }
     } else {
-        //alligned = false;
-        alligned = true; // coba
+        //aligned = false;
+        aligned = true; // coba
     }
 }
 
 // Guna semasa dalam menu
 function navigate() {
     'use strict';
-    /*if (up) {
-        boxman.frame_column = 1;
-        boxman.arah_ver = 1;
-        boxman.frame_row = 0 + 4 * boxman.arah_ver;
-    }
-
-    if (down) {
-        boxman.frame_column = 1;
-        boxman.arah_ver = 0;
-        boxman.frame_row = 0 + 4 * boxman.arah_ver;
-    }*/
     
+    blhtekan:
     if (boleh_tekan) {
         // Row
         if (up) {
-            if (row === 0) {
-                row = 4;
-            } else {
-                row -= 1;
-            }
+            row = (row === 0) ? 4 : row - 1;
             boleh_tekan = false;
+            break blhtekan;
         }
 
         if (down) {
             row = (row + 1) % 5;
             boleh_tekan = false;
+            break blhtekan;
         }
         
         // Column
         if (left) {
-            if (col === 0) {
-                col = 3;
-            } else {
-                col -= 1;
-            }
+            col = (col === 0) ? 3 : col - 1;
             boleh_tekan = false;
+            break blhtekan;
         }
 
         if (right) {
             col = (col + 1) % 4;
             boleh_tekan = false;
+            break blhtekan;
         }
     }
     
@@ -726,35 +646,6 @@ function navigate() {
     if (inv_arr[col + row * 4] !== undefined) {
         inv_arr[col + row * 4].describe();
     }
-/*
-    if (!up && !down) { // disable diagonal movements
-        if (left) {
-            boxman.setHSpeed(-2);
-        }
-
-        if (right) {
-            boxman.setHSpeed(2);
-        }
-    }
-
-    if (!left && !right) { // disable diagonal movements
-        if (up) {
-            boxman.setVSpeed(-2);
-        }
-
-        if (down) {
-            boxman.setVSpeed(2);
-        }
-    }
-
-    if (!left && !right) boxman.setHSpeed(0);
-
-    if (!up && !down) boxman.setVSpeed(0);
-
-    if (dahlepas_inv && inv) {
-        currentScene = 5;
-        dahlepas_inv = false;
-    }*/
 }
 
 // Gerakkan boxman dan crate
@@ -832,9 +723,7 @@ function boxmanAnimate(box_x, box_y) {
             boxman.frame_row = 4 * boxman.arah_ver + (boxman.frame_row + 1) % 4;
         }
         boxman.pelambat = (boxman.pelambat + 1) % 4;
-    }/* else { // Kalau stay (macam tak perlu)
-        boxman.frame_row = 0 + 4 * boxman.arah_hor;
-    }*/
+    }
 }
 
 function collisionCheck(box_x, box_y) {
@@ -893,11 +782,12 @@ function collisionCheck(box_x, box_y) {
 
 function drawTextbox(player, NPC, ygbercakap_x, ygbercakap_y, text_width) {
     var x1, y1, x2, y2;
+    var bubbleheight = 44 - (text[NPC.textID][NPC.text][NPC.tukar].length > 22 ? 0 : 11);
     
     if (player.getX() !== NPC.getX()) {
         if (NPC.tukar !== 0) {
             x1 = ygbercakap_x - vx + 16 - (text_width / 2 + 10);
-            y1 = ygbercakap_y - vy - 57;
+            y1 = ygbercakap_y - vy - 57 + (text[NPC.textID][NPC.text][NPC.tukar].length > 22 ? 0 : 11);
             x2 = ygbercakap_x - vx + 16 + (text_width / 2 + 10);
             y2 = ygbercakap_y - vy - 13;
             
@@ -905,9 +795,14 @@ function drawTextbox(player, NPC, ygbercakap_x, ygbercakap_y, text_width) {
             x2 -= 10;
 
             //drawImage(image,sx,sy,sw,sh,dx,dy,dw,dh)
-            ctx.drawImage(bubble, 4, 0, 1, 44, x1, y1, x2 - x1, 44); // latar
+            /*ctx.drawImage(bubble, 4, 0, 1, 44, x1, y1, x2 - x1, 44); // latar
             ctx.drawImage(bubble, 0, 0, 10, 44, x1 - 10, y1, 10, 44);
             ctx.drawImage(bubble, 40, 0, 10, 44, x2, y1, 10, 44);
+            ctx.drawImage(bubble, 20, 42, 10, 7, ygbercakap_x - vx + 11, y2 - 2, 10, 7); // segi tiga*/
+            
+            ctx.drawImage(bubble, 4, 0, 1, 44, x1, y1, x2 - x1, bubbleheight); // latar
+            ctx.drawImage(bubble, 0, 0, 10, 44, x1 - 10, y1, 10, bubbleheight);
+            ctx.drawImage(bubble, 40, 0, 10, 44, x2, y1, 10, bubbleheight);
             ctx.drawImage(bubble, 20, 42, 10, 7, ygbercakap_x - vx + 11, y2 - 2, 10, 7); // segi tiga
         }
     } else { // player.getX() === NPC.getX()
@@ -915,7 +810,7 @@ function drawTextbox(player, NPC, ygbercakap_x, ygbercakap_y, text_width) {
             if ((ygbercakap_y === NPC.getY() && NPC.getY() < player.getY())
                 || (ygbercakap_y === player.getY() && NPC.getY() > player.getY())) {
                 x1 = ygbercakap_x - vx + 16 - (text_width / 2 + 10);
-                y1 = ygbercakap_y - vy - 57;
+                y1 = ygbercakap_y - vy - 57 + (text[NPC.textID][NPC.text][NPC.tukar].length > 22 ? 0 : 11);
                 x2 = ygbercakap_x - vx + 16 + (text_width / 2 + 10);
                 y2 = ygbercakap_y - vy - 13;
 
@@ -923,9 +818,9 @@ function drawTextbox(player, NPC, ygbercakap_x, ygbercakap_y, text_width) {
                 x2 -= 10;
 
                 //drawImage(image,sx,sy,sw,sh,dx,dy,dw,dh)
-                ctx.drawImage(bubble, 4, 0, 1, 44, x1, y1, x2 - x1, 44); // latar
-                ctx.drawImage(bubble, 0, 0, 10, 44, x1 - 10, y1, 10, 44);
-                ctx.drawImage(bubble, 40, 0, 10, 44, x2, y1, 10, 44);
+                ctx.drawImage(bubble, 4, 0, 1, 44, x1, y1, x2 - x1, bubbleheight); // latar
+                ctx.drawImage(bubble, 0, 0, 10, 44, x1 - 10, y1, 10, bubbleheight);
+                ctx.drawImage(bubble, 40, 0, 10, 44, x2, y1, 10, bubbleheight);
                 ctx.drawImage(bubble, 20, 42, 10, 7, ygbercakap_x - vx + 11, y2 - 2, 10, 7); // segi tiga
             } else {
                 x1 = ygbercakap_x - vx + 16 - (text_width / 2 + 10);
@@ -937,21 +832,22 @@ function drawTextbox(player, NPC, ygbercakap_x, ygbercakap_y, text_width) {
                 x2 -= 10;
 
                 //drawImage(image,sx,sy,sw,sh,dx,dy,dw,dh)
-                ctx.drawImage(bubble, 4, 0, 1, 44, x1, y1, x2 - x1, 44); // latar
-                ctx.drawImage(bubble, 0, 0, 10, 44, x1 - 10, y1, 10, 44);
-                ctx.drawImage(bubble, 40, 0, 10, 44, x2, y1, 10, 44);
+                ctx.drawImage(bubble, 4, 0, 1, 44, x1, y1, x2 - x1, bubbleheight); // latar
+                ctx.drawImage(bubble, 0, 0, 10, 44, x1 - 10, y1, 10, bubbleheight);
+                ctx.drawImage(bubble, 40, 0, 10, 44, x2, y1, 10, bubbleheight);
                 ctx.drawImage(bubble, 20, 15, 10, 7, ygbercakap_x - vx + 11, y1 - 5, 10, 7); // segi tiga
             }
         }
     }
 }
 
+// Simpan koordinat X pada source image
 function textToBekas(bekasIndex, text) {
     'use strict';
     var text_length = text.length;
     
     for (var i = 0; i < text_length; i++) {
-        bekas[bekasIndex][i] = (text.charCodeAt(i) - 32) * char_width;
+        bekas[bekasIndex].push((text.charCodeAt(i) - 32) * char_width);
     }
 }
 
@@ -979,52 +875,27 @@ function tulis(text, player, player_x, player_y, NPC) {
             drawTextbox(player, NPC, ygbercakap.getX(), ygbercakap.getY(), text_width);
         }
     } else {
-        //Tukar sprite player berdasarkan kedudukan NPC
-        if (player.getX() > NPC.getX()) {
-            player.frame_column = 0;
-            player.arah_hor = 1;
-            boxman.frame_row = 4 * boxman.arah_hor;
-        } else if (player.getX() < NPC.getX()) {
-            player.frame_column = 0;
-            player.arah_hor = 0;
-            boxman.frame_row = 4 * boxman.arah_hor;
-        } else if (player.getY() > NPC.getY()) {
-            player.frame_column = 1;
-            player.arah_ver = 1;
-            boxman.frame_row = 4 * boxman.arah_ver;
-        } else if (player.getY() < NPC.getY()) {
-            player.frame_column = 1;
-            player.arah_ver = 0;
-            boxman.frame_row = 4 * boxman.arah_ver;
-        }
-        
         var ygbercakap = (text[NPC.tukar][21] === '#') ? NPC : player;
         
         var text_width; //lebar dalam pixel
-        if (var_panjang[0] > var_panjang[1]) {
-            text_width = var_panjang[0] * char_width;
-        } else {
-            text_width = var_panjang[1] * char_width;
-        }
+        text_width = ((var_panjang[0] > var_panjang[1]) ? var_panjang[0] : var_panjang[1]) * char_width;
         
         ctx.fillStyle = '#FFF';
         
         drawTextbox(player, NPC, ygbercakap.getX(), ygbercakap.getY(), text_width);
 
         // 'TULIS' //////////////////
-        // bekas[0] (baris pertama)
+        // baris pertama
         
         var string_reg_x = ygbercakap.getX() - vx + 16 - var_panjang[0] * char_width / 2;
+        var string_reg_y;
         
-        if (player.getX() === NPC.getX()) {
-            if ((ygbercakap === NPC && NPC.getY() < player.getY())
-                || (ygbercakap === player && NPC.getY() > player.getY())) {
-                var string_reg_y = ygbercakap.getY() - 46; //13 + char_height*3 = 46
-            } else {
-                var string_reg_y = ygbercakap.getY() + 56; //46+32-char_height*2= 56
-            }
+        if (player.getX() === NPC.getX()
+            && ((ygbercakap === player && NPC.getY() < player.getY())
+                || (ygbercakap === NPC && NPC.getY() > player.getY()))) {
+            string_reg_y = ygbercakap.getY() + 56; //46+32-char_height*2= 56    
         } else {
-            var string_reg_y = ygbercakap.getY() - 46; //13 + char_height*3 = 46
+            string_reg_y = ygbercakap.getY() - 46 + (text[NPC.tukar].length > 22 ? 0 : 11); //13 + char_height*3 = 46
         }
 
         var i;
@@ -1033,15 +904,13 @@ function tulis(text, player, player_x, player_y, NPC) {
         panjang_teks = text[NPC.tukar].substring(0, 21).trim().length;
 
         // kosongkan bekas sebelum isi nombor baru
-        // Kena ubah supaya lebih efficient///////
-        for (i = 0; i < panjang_teks; i++) {
-            bekas[0][i] = 0;
-        }
+        bekas[0] = [];
 
         var_panjang[0] += (var_panjang[0] < panjang_teks) ? 1 : 0;
         textToBekas(0, text[NPC.tukar].substring(0, var_panjang[0]));
         
-        for (i = 0; i < panjang_teks; i++) {
+        // Tulis!
+        for (i = 0; i < var_panjang[0]; i++) {
             //drawImage(image,sx,sy,sw,sh,dx,dy,dw,dh)
             ctx.drawImage(
                 typeface,
@@ -1055,39 +924,35 @@ function tulis(text, player, player_x, player_y, NPC) {
                 char_height);
         }
 
-        // bekas[1] (baris kedua)
-        //text = text[3].substring(22);
-
-        // kosongkan bekas sebelum isi nombor baru
-        // Kena ubah supaya lebih efficient /////////////////
-        var pjg_teks_sblm = panjang_teks;
-        panjang_teks = text[NPC.tukar].substring(22).length; //bil aksara
-        for (i = 0; i < panjang_teks; i++) {
-            bekas[1][i] = 0;
-        }
-
-        //kalau line yg pertama dah habis tulis
-        if (var_panjang[0] === pjg_teks_sblm) {
+        // baris kedua ///////////////////////////////////
+        
+        // kalau line yg pertama dah habis tulis
+        if (var_panjang[0] === panjang_teks) {
+            panjang_teks = text[NPC.tukar].substring(22).length; //bil aksara
+            
+            // kosongkan bekas sebelum isi nombor baru
+            bekas[1] = [];
+            
             var_panjang[1] += (var_panjang[1] < panjang_teks) ? 1 : 0;
-        }
+            
+            textToBekas(1, text[NPC.tukar].substring(22, 22 + var_panjang[1]));
 
-        textToBekas(1, text[NPC.tukar].substring(22, 22 + var_panjang[1]));
-        
-        string_reg_x = ygbercakap.getX() - vx + 16 - var_panjang[1] * char_width / 2;
-        
-        string_reg_y += 11;
-        for (i = 0; i < panjang_teks; i++) {
-            //drawImage(image,sx,sy,sw,sh,dx,dy,dw,dh)
-            ctx.drawImage(
-                typeface,
-                bekas[1][i],
-                0,
-                char_width,
-                char_height,
-                string_reg_x + i * char_width,
-                string_reg_y - vy,
-                char_width,
-                char_height);
+            string_reg_x = ygbercakap.getX() - vx + 16 - var_panjang[1] * char_width / 2;
+
+            string_reg_y += 11;
+            for (i = 0; i < var_panjang[1]; i++) {
+                //drawImage(image,sx,sy,sw,sh,dx,dy,dw,dh)
+                ctx.drawImage(
+                    typeface,
+                    bekas[1][i],
+                    0,
+                    char_width,
+                    char_height,
+                    string_reg_x + i * char_width,
+                    string_reg_y - vy,
+                    char_width,
+                    char_height);
+            }
         }
         
         // ketengahkan kamera ke character yang bercakap
@@ -1230,12 +1095,10 @@ function scene0() {
         box_x = boxman.getX();
         box_y = boxman.getY();
         
-        // If alligned to grid
-        if (alligned) {
+        // If aligned to grid
+        if (aligned) {
             // Uji jarak dan collision
             collisionCheck(box_x, box_y);
-            
-            unlock = (crate.getX() === 32 && crate.getY() === 32) ? true : false;
         }
         
         // Gerakkan boxman dan crate
@@ -1294,8 +1157,8 @@ function scene1() {
     box_x = boxman.getX();
     box_y = boxman.getY();
     
-    // If alligned to grid
-    if (alligned) {
+    // If aligned to grid
+    if (aligned) {
         collisionCheck(box_x, box_y);
     }
     
@@ -1335,20 +1198,7 @@ function inventory() {
     ctx.fillStyle = '#494949';
     ctx.fillRect(193, 29, 142, 102);
     
-    /*ctx.fillStyle = '#404040';
-    ctx.fillRect(0, 0, 115, canvas.height);
-    
-    ctx.fillStyle = '#515151';
-    ctx.fillRect(115, 0, canvas.width - 115, canvas.height);*/
-    
     navigate();
-    
-    // Tak fleksibel
-    /*if (inv_arr.length > 0 && inv_arr[0] === tangga) {
-        ctx.drawImage(tangga.sprite, 12, 24);
-        //ctx.drawImage(roti.sprite, 52, 24);
-        //ctx.drawImage(kelapa.sprite, 92, 24);
-    }*/
     
     var store_i;
     var itemrow;
@@ -1361,7 +1211,26 @@ function inventory() {
             itemrow++;
         }
         
+        // Draw the item's icon
         ctx.drawImage(inv_arr[i].sprite, 12 + 40 * (i % 4), 24 + 40 * itemrow);
+        
+        if (inv_arr[i].stackable) {
+            var numstr = inv_arrQty[i].toString();
+            var numstr_length = numstr.length;
+            
+            for (var j = 0; j < numstr_length; j++) {
+                ctx.drawImage(
+                    typefacew,
+                    (numstr.charCodeAt(j) - 32) * char_width,
+                    0,
+                    char_width,
+                    char_height,
+                    14 + 40 * (i % 4) + j * char_width,
+                    24 + 40 * itemrow,
+                    char_width,
+                    char_height);
+            }
+        }
     }
     
     if (dahlepas_inv && inv) {
@@ -1373,46 +1242,33 @@ function inventory() {
     }
 } //inventory
 
-/*function kedai() {
-    'use strict';
-    
-    ctx.fillStyle = '#404040';
-    ctx.fillRect(0, 0, 115, canvas.height);
-    
-    ctx.fillStyle = '#515151';
-    ctx.fillRect(115, 0, canvas.width - 115, canvas.height);
-    
-    // Tak fleksibel
-    if (inv_arr.length > 0 && inv_arr[0] === tangga) {
-        ctx.drawImage(tangga.sprite, 135, 30);
-    }
-    
-    if (dahlepas_inv && inv) {
-        currentScene = 0;
-        dahlepas_inv = false;
-    }
-} //kedai*/
-
 document.addEventListener('keydown', function (event) {
     switch (event.keyCode) {
         case 32:
             space = true;
             
-            // If allined to grid
-            if (alligned) {
+            // If aligned to grid
+            if (aligned) {
                 if (enpisi !== undefined && enpisi.can_interact && dahlepas_space) {
                     if (var_panjang[1] === panjang_teks) {
                         // Kosongkan var_panjang
                         var_panjang = [0,0];
                         if (enpisi.textID !== undefined) {
-                            if (enpisi.tukar < text[enpisi.textID][enpisi.text].length - 1) {
-                                enpisi.tukar += 1;
-                            } else {
-                                panjang_teks = 0;
-                                enpisi.tukar = 0;
-                                if (enpisi === kk && kk.text === 0) {
-                                    masuk(tangga);
-                                    kk.text = 1;
+                            if ((boxman.getX() === enpisi.getX() && boxman.frame_column === 1) ||
+                                (boxman.getY() === enpisi.getY() && boxman.frame_column === 0)) {
+                                if (enpisi.tukar < text[enpisi.textID][enpisi.text].length - 1) {
+                                    enpisi.tukar += 1;
+                                } else {
+                                    panjang_teks = 0;
+                                    enpisi.tukar = 0;
+                                    if (enpisi === kk && kk.text === 0) {
+                                        masuk(tangga);
+                                        kk.text = 1;
+                                    } else if (enpisi === monstak && monstak.text === 0) {
+                                        monstak.text = 1;
+                                    } else if (enpisi === boxbiru && boxbiru.text === 0) {
+                                        boxbiru.text = 1;
+                                    }
                                 }
                             }
                         }
@@ -1463,10 +1319,6 @@ document.addEventListener('keyup', function (event) {
             dahlepas_inv = true;
             break;
     }
-});
-
-canvas.addEventListener('mouseup', function (event) {
-    console.log('asdasd');
 });
 
 window.addEventListener('resize', function() {

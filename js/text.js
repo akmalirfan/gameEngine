@@ -1,4 +1,6 @@
-// text[watak/textID][no][tukar]
+// TO-DO: Buang empty string. Guna splice()
+
+// text[textID][no][tukar]
 var text = [
     [ //monstak
         [
@@ -11,14 +13,30 @@ var text = [
             "Lebih baik kau       #berhati-hati",
             "Tempat ni            #bahaya!",
             "Ohh..                @Baiklah"
+        ],
+        [
+            "", // biarkan kosong
+            
+            "Hati-hati            #tau",
+            "Baik.                @Terima kasih"
         ]
     ],
     [ //boxbiru
         [
             "", // biarkan kosong
             
-            "Hoi                  #hoi!",
-            "Hai                  @hai!"
+            "Kau buat             @apa?",
+            "Siram                #rumput",
+            "Okay.                @Teruskan"
+        ],
+        [
+            "", // biarkan kosong
+            
+            "Mana                 @airnya?",
+            "Ada. Kau je          #tak nampak",
+            "...                  @",
+            "...                  #",
+            "...                  @"
         ]
     ],
     [ //kk
@@ -27,23 +45,23 @@ var text = [
             
             "Nah                  #tangga",
             "Kenapa bagi          @aku?",
-            "Saje                 #je",
+            "Saja                 #je",
             "Err..                @Terima kasih"
         ],
         [ // 1
             "", // biarkan kosong
             
-            "Best tak             #tangga tu?",
-            "Yup.                 @BEST GILEE!!!"
+            "Berguna tak          #tangga tu?",
+            "Aku tak guna         @pun lagi"
         ]
     ],
     [ //barang-barang
         [ // 0
             // tangga
-            "Tangga. Nak terangkan#jugak ke?",
+            "Tangga boleh lipat.  #",
             
             // Roti
-            "Roti dewan makan.    #Pulihkan 50 HP",
+            "Roti gandum penuh.   #Pulihkan 50 HP",
             
             // Kelapa
             "Segar dari ladang.   #Pulihkan 80 HP",
@@ -63,7 +81,7 @@ var text = [
 
 
 /*
-function tukarText(char, no) { 
+function tukarText(char, no) {
 text = ['']; // kosongkan
 
 if (char === 1) { // yellow monster
