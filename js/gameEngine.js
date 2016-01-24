@@ -66,16 +66,13 @@ var interval = 1000 / 60,
     collisionD2 = false,
     ///////////////////////
     
-    /* Variables untuk dialog */
-    //can_interact = false,
+    // Variables untuk dialog
     typeface = new Image(),
     typefacew = new Image(),
     sdgcakap = false,
     bekas = [[],[]],
     panjang_teks = 0,
-    NPC_bercakap,
     var_panjang = [0, 0], //untuk buat FX menaip pada string
-    //tukar = 0,
     char_width = 6,
     char_height = 11,
     
@@ -164,7 +161,6 @@ function Character(img_src, textID) {
   Char.draw = function() {
     //drawImage(image,sx,sy,sw,sh,dx,dy,dw,dh)
     if (img_src !== null) {
-      //console.log(img_src, this.getX());
       ctx.drawImage(
         Char.sprite,
         Char.frame_column * 32,
@@ -353,17 +349,6 @@ tileNo = [
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,10,10,10,11],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,12,12,13,12,12]
         ]
-    ],
-    [ // scene1 /////////////////////////////////////////////////////////////////////
-        [ // layer 0
-            [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
-            [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
-            [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
-            [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
-            [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
-            [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
-            [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
-        ]
     ]
 ];
 
@@ -450,7 +435,7 @@ function gotoScene(scene) {
         invWalls11.setX(192);
         invWalls11.setY(352);
         
-        /*invWalls12.setX(64);
+        invWalls12.setX(64);
         invWalls12.setY(384);
         invWalls13.setX(96);
         invWalls13.setY(384);
@@ -459,14 +444,7 @@ function gotoScene(scene) {
         invWalls15.setX(160);
         invWalls15.setY(384);
         invWalls16.setX(192);
-        invWalls16.setY(384);*/
-        
-        invWalls13.setX(96);
-        invWalls13.setY(352);
-        invWalls14.setX(128);
-        invWalls14.setY(352);
-        invWalls15.setX(160);
-        invWalls15.setY(352);
+        invWalls16.setY(384);
     } else if (scene === 1) {
         entArray = [
             boxman,
@@ -736,10 +714,12 @@ function collisionCheck(box_x, box_y) {
             || ((boxman.getX() === entArray2[ent].getX())
             && (boxman.getY() === entArray2[ent].getY()-32 || boxman.getY() === entArray2[ent].getY()+32))) {
             entArray2[ent].can_interact = true;
+            
             if (entArray2[ent] !== crate) // coba
                 enpisi = entArray2[ent];
+            
+            // This is out of place
             if (enpisi !== undefined
-                && enpisi.textID !== null
                 && enpisi.textID !== undefined) {
                 tulis(
                     text[enpisi.textID][enpisi.text],
@@ -754,7 +734,8 @@ function collisionCheck(box_x, box_y) {
         }
         
         // Uji collision
-        if (entArray2[ent].getInView() && entArray2[ent] !== crate) {
+        //if (entArray2[ent].getInView() && entArray2[ent] !== crate) {
+        if (entArray2[ent] !== crate) {
             if (entArray2[ent].getY() === boxman.getY()) {
                 if (entArray2[ent].getX() === boxman.getX() - 32) {
                     collisionL = true;
@@ -795,11 +776,6 @@ function drawTextbox(player, NPC, ygbercakap_x, ygbercakap_y, text_width) {
             x2 -= 10;
 
             //drawImage(image,sx,sy,sw,sh,dx,dy,dw,dh)
-            /*ctx.drawImage(bubble, 4, 0, 1, 44, x1, y1, x2 - x1, 44); // latar
-            ctx.drawImage(bubble, 0, 0, 10, 44, x1 - 10, y1, 10, 44);
-            ctx.drawImage(bubble, 40, 0, 10, 44, x2, y1, 10, 44);
-            ctx.drawImage(bubble, 20, 42, 10, 7, ygbercakap_x - vx + 11, y2 - 2, 10, 7); // segi tiga*/
-            
             ctx.drawImage(bubble, 4, 0, 1, 44, x1, y1, x2 - x1, bubbleheight); // latar
             ctx.drawImage(bubble, 0, 0, 10, 44, x1 - 10, y1, 10, bubbleheight);
             ctx.drawImage(bubble, 40, 0, 10, 44, x2, y1, 10, bubbleheight);
@@ -1039,9 +1015,6 @@ function gameLoop() {
         case 0:
             scene0();
             break;
-        case 1:
-            scene1();
-            break;
         case 5:
             inventory();
             break;
@@ -1096,10 +1069,7 @@ function scene0() {
         box_y = boxman.getY();
         
         // If aligned to grid
-        if (aligned) {
-            // Uji jarak dan collision
-            collisionCheck(box_x, box_y);
-        }
+        if (aligned) collisionCheck(box_x, box_y);
         
         // Gerakkan boxman dan crate
         motion();
@@ -1117,56 +1087,17 @@ function scene0() {
             vy += bezaY;
         }
         ///////////////////////////////////////
-    } else if (enpisi.textID !== null) {
+    } else if (enpisi.textID !== undefined) {
         console.log(text[enpisi.textID][enpisi.text][enpisi.tukar]);
         
         tulis(
             text[enpisi.textID][enpisi.text],
             boxman,
-            box_x,
-            box_y,
+            boxman.getX(),
+            boxman.getY(),
             enpisi);
     }
 } //scene0
-
-function scene1() {
-    'use strict';
-    
-    collisionL = false;
-    collisionR = false;
-    collisionD = false;
-    collisionU = false;
-    
-    collisionL2 = false;
-    collisionR2 = false;
-    collisionD2 = false;
-    collisionU2 = false;
-    
-    drawTiles(0, 0, currentScene, 0, tile);
-    
-    // Tetapkan depth
-    boxman.depth = -boxman.getY();
-    crate.depth = -crate.getY();
-
-    // Draw watak ikut depth
-    drawCharacters();
-    
-    movements();
-    
-    // Simpan nilai x dan y
-    box_x = boxman.getX();
-    box_y = boxman.getY();
-    
-    // If aligned to grid
-    if (aligned) {
-        collisionCheck(box_x, box_y);
-    }
-    
-    // Gerakkan boxman dan crate
-    motion();
-    
-    boxmanAnimate(box_x, box_y);
-} //scene1
 
 function inventory() {
     'use strict';
@@ -1214,6 +1145,7 @@ function inventory() {
         // Draw the item's icon
         ctx.drawImage(inv_arr[i].sprite, 12 + 40 * (i % 4), 24 + 40 * itemrow);
         
+        // If it is stackable, display its quantity
         if (inv_arr[i].stackable) {
             var numstr = inv_arrQty[i].toString();
             var numstr_length = numstr.length;
