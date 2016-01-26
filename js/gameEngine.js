@@ -55,15 +55,9 @@ var interval = 1000 / 60,
     // Collision detection
     aligned = false,
     
-    collisionL = false,
-    collisionR = false,
-    collisionU = false,
-    collisionD = false,
+    collision = 0,
     
-    collisionL2 = false,
-    collisionR2 = false,
-    collisionU2 = false,
-    collisionD2 = false,
+    collision2 = 0,
     ///////////////////////
     
     // Variables untuk dialog
@@ -630,57 +624,60 @@ function navigate() {
 function motion() {
     'use strict';
     if (boxman.getHSpeed() > 0) {
-        if (!collisionR) {
+        // Right
+        if ((collision & 4) !== 4) {
             if (crate.getX() === boxman.getX() + 32 && crate.getY() === boxman.getY()) {
-                if (!collisionR2) boxman.setX(boxman.getX() + boxman.getHSpeed() / 2);
+                if ((collision2 & 4) !== 4) boxman.setX(boxman.getX() + boxman.getHSpeed() / 2);
             } else {
                 boxman.setX(boxman.getX() + boxman.getHSpeed());
             }
         }
         
-        if (!collisionR2
+        if ((collision2 & 4) !== 4
             && crate.can_interact
             && crate.getX() > boxman.getX()
             && crate.getX() + boxman.getHSpeed() > boxman.getX()) crate.setX(crate.getX() + boxman.getHSpeed() / 2);
     } else if (boxman.getHSpeed() < 0) {
-        if (!collisionL) {
+        // Left
+        if ((collision & 8) !== 8) {
             if (crate.getX() === boxman.getX() - 32 && crate.getY() === boxman.getY()) {
-                if (!collisionL2) boxman.setX(boxman.getX() + boxman.getHSpeed() / 2);
+                if ((collision2 & 8) !== 8) boxman.setX(boxman.getX() + boxman.getHSpeed() / 2);
             } else {
                 boxman.setX(boxman.getX() + boxman.getHSpeed());
             }
         }
-        if (!collisionL2
+        if ((collision2 & 8) !== 8
             && crate.can_interact
             && crate.getX() < boxman.getX()
             && crate.getX() + boxman.getHSpeed() < boxman.getX()) crate.setX(crate.getX() + boxman.getHSpeed() / 2);
     }
     //////////////////////////////////////////
     if (boxman.getVSpeed() > 0) {
-        if (!collisionD) {
+        // Down
+        if ((collision & 1) !== 1) {
             if (crate.getY() === boxman.getY() + 32 && crate.getX() === boxman.getX()) {
-                if (!collisionD2) boxman.setY(boxman.getY() + boxman.getVSpeed() / 2);
+                if ((collision2 & 1) !== 1) boxman.setY(boxman.getY() + boxman.getVSpeed() / 2);
             } else {
                 boxman.setY(boxman.getY() + boxman.getVSpeed());
             }
         }
-        if (!collisionD2
+        if ((collision2 & 1) !== 1
             && crate.can_interact
             && crate.getY() > boxman.getY()
             && crate.getY() + boxman.getVSpeed() > boxman.getY()) crate.setY(crate.getY() + boxman.getVSpeed() / 2);
     } else if (boxman.getVSpeed() < 0) {
-        if (!collisionU) {
+        // Up
+        if ((collision & 2) !== 2) {
             if (crate.getY() === boxman.getY() - 32 && crate.getX() === boxman.getX()) {
-                if (!collisionU2) boxman.setY(boxman.getY() + boxman.getVSpeed() / 2);
+                if ((collision2 & 2) !== 2) boxman.setY(boxman.getY() + boxman.getVSpeed() / 2);
             } else {
                 boxman.setY(boxman.getY() + boxman.getVSpeed());
             }
         }
-        if (!collisionU2
+        if ((collision2 & 2) !== 2
             && crate.can_interact
             && crate.getY() < boxman.getY()
             && crate.getY() + boxman.getVSpeed() < boxman.getY()) {
-            //
             crate.setY(crate.getY() + boxman.getVSpeed() / 2);
         }
     }
@@ -715,47 +712,40 @@ function collisionCheck(box_x, box_y) {
             && (boxman.getY() === entArray2[ent].getY()-32 || boxman.getY() === entArray2[ent].getY()+32))) {
             entArray2[ent].can_interact = true;
             
-            if (entArray2[ent] !== crate) // coba
+            if (entArray2[ent] !== crate)
                 enpisi = entArray2[ent];
             
             // This is out of place
-            if (enpisi !== undefined
-                && enpisi.textID !== undefined) {
-                if (space) sdgcakap = true;
-                /*tulis(
-                    text[enpisi.textID][enpisi.text],
-                    boxman,
-                    enpisi);*/
-            }
+            if (enpisi.textID !== undefined && space)
+                sdgcakap = (enpisi.tukar === 0) ? false : true;
         } else {
             entArray2[ent].can_interact = false;
             //entArray2[ent].legap = 0;
         }
         
         // Uji collision
-        // Instead of using separate variables, I'm thinking of using
-        // just one variable that can store 4 bits.
+        // LRUD
         //if (entArray2[ent].getInView() && entArray2[ent] !== crate) {
         if (entArray2[ent] !== crate) { // temporary fix
             if (entArray2[ent].getY() === boxman.getY()) {
                 if (entArray2[ent].getX() === boxman.getX() - 32) {
-                    collisionL = true;
+                    collision |= 8;
                 } else if (entArray2[ent].getX() === boxman.getX() - 64) {
-                    collisionL2 = true;
+                    collision2 |= 8;
                 } else if (entArray2[ent].getX() === boxman.getX() + 32) {
-                    collisionR = true;
+                    collision |= 4;
                 } else if (entArray2[ent].getX() === boxman.getX() + 64) {
-                    collisionR2 = true;
+                    collision2 |= 4;
                 }
             } else if (entArray2[ent].getX() === boxman.getX()) {
                 if (entArray2[ent].getY() === boxman.getY() - 32) {
-                    collisionU = true;
+                    collision |= 2;
                 } else if (entArray2[ent].getY() === boxman.getY() - 64) {
-                    collisionU2 = true;
+                    collision2 |= 2;
                 } else if (entArray2[ent].getY() === boxman.getY() + 32) {
-                    collisionD = true;
+                    collision |= 1;
                 } else if (entArray2[ent].getY() === boxman.getY() + 64) {
-                    collisionD2 = true;
+                    collision2 |= 1;
                 }
             }
         }
@@ -833,25 +823,10 @@ function tulis(text, player, NPC) {
     'use strict';
     sdgcakap = (NPC.tukar === 0) ? false : true;
     
-    NPC.legap += 0.1;
-    if (NPC.legap > 1) NPC.legap = 1; // hadkan nilai legap
+    //NPC.legap += 0.1;
+    //if (NPC.legap > 1) NPC.legap = 1; // hadkan nilai legap
     
-    if (!sdgcakap) {
-        if (aligned) {
-            //ctx.fillStyle = 'rgba(255, 255, 255, ' + NPC.legap + ')';
-            
-            // coba
-            /*ctx.save();
-            ctx.globalAlpha = NPC.legap;
-            ctx.fillStyle = 'rgb(255, 255, 255)';
-            ctx.restore();*/
-            // endcoba ///////////////
-            
-            //ygbercakap = player;
-            //text_width = 24;
-            //drawTextbox(player, NPC, text_width);
-        }
-    } else {
+    if (sdgcakap) {
         var ygbercakap = (text[NPC.tukar][21] === '#') ? NPC : player;
         
         var text_width; //lebar dalam pixel
@@ -977,6 +952,18 @@ function tulis(text, player, NPC) {
                 if (vy - 1 >= 0) vy -= 1;
             }
         }*/
+    } else {
+        /*if (aligned) {
+            ctx.fillStyle = 'rgba(255, 255, 255, ' + NPC.legap + ')';
+            
+            ctx.save();
+            ctx.globalAlpha = NPC.legap;
+            ctx.fillStyle = 'rgb(255, 255, 255)';
+            ctx.restore();
+            
+            text_width = 24;
+            drawTextbox(player, NPC, text_width);
+        }*/
     }
 }
 
@@ -1025,15 +1012,9 @@ function gameLoop() {
 function scene0() {
     'use strict';
     
-    collisionL = false;
-    collisionR = false;
-    collisionD = false;
-    collisionU = false;
+    collision &= 0;
     
-    collisionL2 = false;
-    collisionR2 = false;
-    collisionD2 = false;
-    collisionU2 = false;
+    collision2 &= 0;
     
     drawTiles(0, 0, currentScene, 0, tile);
     
