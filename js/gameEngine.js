@@ -721,21 +721,22 @@ function collisionCheck(box_x, box_y) {
             // This is out of place
             if (enpisi !== undefined
                 && enpisi.textID !== undefined) {
-                tulis(
+                if (space) sdgcakap = true;
+                /*tulis(
                     text[enpisi.textID][enpisi.text],
                     boxman,
-                    box_x,
-                    box_y,
-                    enpisi);
+                    enpisi);*/
             }
         } else {
             entArray2[ent].can_interact = false;
-            entArray2[ent].legap = 0;
+            //entArray2[ent].legap = 0;
         }
         
         // Uji collision
+        // Instead of using separate variables, I'm thinking of using
+        // just one variable that can store 4 bits.
         //if (entArray2[ent].getInView() && entArray2[ent] !== crate) {
-        if (entArray2[ent] !== crate) {
+        if (entArray2[ent] !== crate) { // temporary fix
             if (entArray2[ent].getY() === boxman.getY()) {
                 if (entArray2[ent].getX() === boxman.getX() - 32) {
                     collisionL = true;
@@ -828,16 +829,16 @@ function textToBekas(bekasIndex, text) {
 }
 
 // LUKIS TEXTBOX + 'TULIS' ////////////////
-function tulis(text, player, player_x, player_y, NPC) {
+function tulis(text, player, NPC) {
     'use strict';
     sdgcakap = (NPC.tukar === 0) ? false : true;
     
     NPC.legap += 0.1;
-	if (NPC.legap > 1) NPC.legap = 1; // hadkan nilai legap
+    if (NPC.legap > 1) NPC.legap = 1; // hadkan nilai legap
     
     if (!sdgcakap) {
-        if (player.getX() === player_x && player.getY() === player_y) { // Kalau kedudukan tak berubah
-            ctx.fillStyle = 'rgba(255, 255, 255, ' + NPC.legap + ')';
+        if (aligned) {
+            //ctx.fillStyle = 'rgba(255, 255, 255, ' + NPC.legap + ')';
             
             // coba
             /*ctx.save();
@@ -846,9 +847,9 @@ function tulis(text, player, player_x, player_y, NPC) {
             ctx.restore();*/
             // endcoba ///////////////
             
-            ygbercakap = player;
-            
-            drawTextbox(player, NPC, ygbercakap.getX(), ygbercakap.getY(), text_width);
+            //ygbercakap = player;
+            //text_width = 24;
+            //drawTextbox(player, NPC, text_width);
         }
     } else {
         var ygbercakap = (text[NPC.tukar][21] === '#') ? NPC : player;
@@ -1086,15 +1087,12 @@ function scene0() {
             bezaY = boxman.getY()-vy - 96;
             vy += bezaY;
         }
-        ///////////////////////////////////////
-    } else if (enpisi.textID !== undefined) {
+    } else {
         console.log(text[enpisi.textID][enpisi.text][enpisi.tukar]);
         
         tulis(
             text[enpisi.textID][enpisi.text],
             boxman,
-            boxman.getX(),
-            boxman.getY(),
             enpisi);
     }
 } //scene0
@@ -1181,31 +1179,29 @@ document.addEventListener('keydown', function (event) {
             
             // If aligned to grid
             if (aligned) {
-                if (enpisi !== undefined && enpisi.can_interact && dahlepas_space) {
-                    if (var_panjang[1] === panjang_teks) {
-                        // Kosongkan var_panjang
-                        var_panjang = [0,0];
-                        if (enpisi.textID !== undefined) {
-                            if ((boxman.getX() === enpisi.getX() && boxman.frame_column === 1) ||
-                                (boxman.getY() === enpisi.getY() && boxman.frame_column === 0)) {
-                                if (enpisi.tukar < text[enpisi.textID][enpisi.text].length - 1) {
-                                    enpisi.tukar += 1;
-                                } else {
-                                    panjang_teks = 0;
-                                    enpisi.tukar = 0;
-                                    if (enpisi === kk && kk.text === 0) {
-                                        masuk(tangga);
-                                        kk.text = 1;
-                                    } else if (enpisi === monstak && monstak.text === 0) {
-                                        monstak.text = 1;
-                                    } else if (enpisi === boxbiru && boxbiru.text === 0) {
-                                        boxbiru.text = 1;
-                                    }
+                if (enpisi !== undefined && enpisi.can_interact && dahlepas_space && var_panjang[1] === panjang_teks) {
+                    // Kosongkan var_panjang
+                    var_panjang = [0,0];
+                    if (enpisi.textID !== undefined) {
+                        if ((boxman.getX() === enpisi.getX() && boxman.frame_column === 1) ||
+                            (boxman.getY() === enpisi.getY() && boxman.frame_column === 0)) {
+                            if (enpisi.tukar < text[enpisi.textID][enpisi.text].length - 1) {
+                                enpisi.tukar += 1;
+                            } else {
+                                panjang_teks = 0;
+                                enpisi.tukar = 0;
+                                if (enpisi === kk && kk.text === 0) {
+                                    masuk(tangga);
+                                    kk.text = 1;
+                                } else if (enpisi === monstak && monstak.text === 0) {
+                                    monstak.text = 1;
+                                } else if (enpisi === boxbiru && boxbiru.text === 0) {
+                                    boxbiru.text = 1;
                                 }
                             }
                         }
-                        dahlepas_space = false;
                     }
+                    dahlepas_space = false;
                 }
             }
             
