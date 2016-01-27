@@ -36,7 +36,7 @@ var interval = 1000 / 60,
     space = false,
     inv = false,
     
-    // Guna untuk inventory //
+    // Guna untuk inventory
     row = 0,
     col = 0,
     boleh_tekan = true,
@@ -461,16 +461,16 @@ function drawTiles(row, column, scene, layer, tileset) {
     for (var i = column, tileNo0_l = tileNo[scene][layer][0].length; i < tileNo0_l; i++) {
         for (var j = row, tileNo_l = tileNo[scene][layer].length; j < tileNo_l; j++) {
             if (tileNo[scene][layer][j][i] !== 0) // if 0, do nothing
-            ctx.drawImage(
-                tileset,
-                0,
-                tileNo[scene][layer][j][i] * tileHeight,
-                tileWidth,
-                tileHeight,
-                i * tileWidth - vx,
-                j * tileHeight - vy,
-                tileWidth,
-                tileHeight);
+                ctx.drawImage(
+                    tileset,
+                    0,
+                    tileNo[scene][layer][j][i] * tileHeight,
+                    tileWidth,
+                    tileHeight,
+                    i * tileWidth - vx,
+                    j * tileHeight - vy,
+                    tileWidth,
+                    tileHeight);
         }
     }
 }
@@ -686,13 +686,15 @@ function motion() {
 //Animasi untuk boxman
 function boxmanAnimate(box_x, box_y) {
     'use strict';
-    if (box_x !== boxman.getX()) { // Kalau kedudukan berubah
+    
+    // Kalau kedudukan berubah
+    if (box_x !== boxman.getX()) {
         boxman.frame_column = 0;
         if (boxman.pelambat === 0) {
             boxman.frame_row = 4 * boxman.arah_hor + (boxman.frame_row + 1) % 4;
         }
         boxman.pelambat = (boxman.pelambat + 1) % 4;
-    } else if (box_y !== boxman.getY()) { // Kalau kedudukan berubah
+    } else if (box_y !== boxman.getY()) {
         boxman.frame_column = 1;
         if (boxman.pelambat === 0) {
             boxman.frame_row = 4 * boxman.arah_ver + (boxman.frame_row + 1) % 4;
@@ -712,12 +714,10 @@ function collisionCheck(box_x, box_y) {
             && (boxman.getY() === entArray2[ent].getY()-32 || boxman.getY() === entArray2[ent].getY()+32))) {
             entArray2[ent].can_interact = true;
             
-            if (entArray2[ent] !== crate)
+            if (entArray2[ent] !== crate && entArray2[ent].sprite !== undefined) {
                 enpisi = entArray2[ent];
-            
-            // This is out of place
-            if (enpisi.textID !== undefined && space)
-                sdgcakap = (enpisi.tukar === 0) ? false : true;
+                if (space) sdgcakap = (enpisi.tukar === 0) ? false : true;
+            }
         } else {
             entArray2[ent].can_interact = false;
             //entArray2[ent].legap = 0;
@@ -952,8 +952,8 @@ function tulis(text, player, NPC) {
                 if (vy - 1 >= 0) vy -= 1;
             }
         }*/
-    } else {
-        /*if (aligned) {
+    } /*else {
+        if (aligned) {
             ctx.fillStyle = 'rgba(255, 255, 255, ' + NPC.legap + ')';
             
             ctx.save();
@@ -963,8 +963,8 @@ function tulis(text, player, NPC) {
             
             text_width = 24;
             drawTextbox(player, NPC, text_width);
-        }*/
-    }
+        }
+    }*/
 }
 
 function gameLoop() {
@@ -1163,7 +1163,9 @@ document.addEventListener('keydown', function (event) {
                 if (enpisi !== undefined && enpisi.can_interact && dahlepas_space && var_panjang[1] === panjang_teks) {
                     // Kosongkan var_panjang
                     var_panjang = [0,0];
+                    
                     if (enpisi.textID !== undefined) {
+                        // Kalau player menghadap ke NPC
                         if ((boxman.getX() === enpisi.getX() && boxman.frame_column === 1) ||
                             (boxman.getY() === enpisi.getY() && boxman.frame_column === 0)) {
                             if (enpisi.tukar < text[enpisi.textID][enpisi.text].length - 1) {
@@ -1171,6 +1173,7 @@ document.addEventListener('keydown', function (event) {
                             } else {
                                 panjang_teks = 0;
                                 enpisi.tukar = 0;
+                                
                                 if (enpisi === kk && kk.text === 0) {
                                     masuk(tangga);
                                     kk.text = 1;
