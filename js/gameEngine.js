@@ -54,11 +54,7 @@ var interval = 1000 / 60,
     
     // Collision detection
     aligned = false,
-    
     collision = 0,
-    
-    collision2 = 0,
-    ///////////////////////
     
     // Variables untuk dialog
     typeface = new Image(),
@@ -623,17 +619,18 @@ function navigate() {
 // Gerakkan boxman dan crate
 function motion() {
     'use strict';
+    
     if (boxman.getHSpeed() > 0) {
         // Right
         if ((collision & 4) !== 4) {
             if (crate.getX() === boxman.getX() + 32 && crate.getY() === boxman.getY()) {
-                if ((collision2 & 4) !== 4) boxman.setX(boxman.getX() + boxman.getHSpeed() / 2);
+                if ((collision & 64) !== 64) boxman.setX(boxman.getX() + boxman.getHSpeed() / 2);
             } else {
                 boxman.setX(boxman.getX() + boxman.getHSpeed());
             }
         }
         
-        if ((collision2 & 4) !== 4
+        if ((collision & 64) !== 64
             && crate.can_interact
             && crate.getX() > boxman.getX()
             && crate.getX() + boxman.getHSpeed() > boxman.getX()) crate.setX(crate.getX() + boxman.getHSpeed() / 2);
@@ -641,12 +638,12 @@ function motion() {
         // Left
         if ((collision & 8) !== 8) {
             if (crate.getX() === boxman.getX() - 32 && crate.getY() === boxman.getY()) {
-                if ((collision2 & 8) !== 8) boxman.setX(boxman.getX() + boxman.getHSpeed() / 2);
+                if ((collision & 128) !== 128) boxman.setX(boxman.getX() + boxman.getHSpeed() / 2);
             } else {
                 boxman.setX(boxman.getX() + boxman.getHSpeed());
             }
         }
-        if ((collision2 & 8) !== 8
+        if ((collision & 128) !== 128
             && crate.can_interact
             && crate.getX() < boxman.getX()
             && crate.getX() + boxman.getHSpeed() < boxman.getX()) crate.setX(crate.getX() + boxman.getHSpeed() / 2);
@@ -656,12 +653,12 @@ function motion() {
         // Down
         if ((collision & 1) !== 1) {
             if (crate.getY() === boxman.getY() + 32 && crate.getX() === boxman.getX()) {
-                if ((collision2 & 1) !== 1) boxman.setY(boxman.getY() + boxman.getVSpeed() / 2);
+                if ((collision & 16) !== 16) boxman.setY(boxman.getY() + boxman.getVSpeed() / 2);
             } else {
                 boxman.setY(boxman.getY() + boxman.getVSpeed());
             }
         }
-        if ((collision2 & 1) !== 1
+        if ((collision & 16) !== 16
             && crate.can_interact
             && crate.getY() > boxman.getY()
             && crate.getY() + boxman.getVSpeed() > boxman.getY()) crate.setY(crate.getY() + boxman.getVSpeed() / 2);
@@ -669,12 +666,12 @@ function motion() {
         // Up
         if ((collision & 2) !== 2) {
             if (crate.getY() === boxman.getY() - 32 && crate.getX() === boxman.getX()) {
-                if ((collision2 & 2) !== 2) boxman.setY(boxman.getY() + boxman.getVSpeed() / 2);
+                if ((collision & 32) !== 32) boxman.setY(boxman.getY() + boxman.getVSpeed() / 2);
             } else {
                 boxman.setY(boxman.getY() + boxman.getVSpeed());
             }
         }
-        if ((collision2 & 2) !== 2
+        if ((collision & 32) !== 32
             && crate.can_interact
             && crate.getY() < boxman.getY()
             && crate.getY() + boxman.getVSpeed() < boxman.getY()) {
@@ -724,28 +721,28 @@ function collisionCheck(box_x, box_y) {
         }
         
         // Uji collision
-        // LRUD
+        // LRUDLRUD
         //if (entArray2[ent].getInView() && entArray2[ent] !== crate) {
         if (entArray2[ent] !== crate) { // temporary fix
             if (entArray2[ent].getY() === boxman.getY()) {
                 if (entArray2[ent].getX() === boxman.getX() - 32) {
                     collision |= 8;
                 } else if (entArray2[ent].getX() === boxman.getX() - 64) {
-                    collision2 |= 8;
+                    collision |= 128;
                 } else if (entArray2[ent].getX() === boxman.getX() + 32) {
                     collision |= 4;
                 } else if (entArray2[ent].getX() === boxman.getX() + 64) {
-                    collision2 |= 4;
+                    collision |= 64;
                 }
             } else if (entArray2[ent].getX() === boxman.getX()) {
                 if (entArray2[ent].getY() === boxman.getY() - 32) {
                     collision |= 2;
                 } else if (entArray2[ent].getY() === boxman.getY() - 64) {
-                    collision2 |= 2;
+                    collision |= 32;
                 } else if (entArray2[ent].getY() === boxman.getY() + 32) {
                     collision |= 1;
                 } else if (entArray2[ent].getY() === boxman.getY() + 64) {
-                    collision2 |= 1;
+                    collision |= 16;
                 }
             }
         }
@@ -1013,8 +1010,6 @@ function scene0() {
     'use strict';
     
     collision &= 0;
-    
-    collision2 &= 0;
     
     drawTiles(0, 0, currentScene, 0, tile);
     
