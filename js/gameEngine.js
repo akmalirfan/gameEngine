@@ -620,62 +620,41 @@ function navigate() {
 function motion() {
     'use strict';
     
-    if (boxman.getHSpeed() > 0) {
-        // Right
-        if ((collision & 4) !== 4) {
-            if (crate.getX() === boxman.getX() + 32 && crate.getY() === boxman.getY()) {
-                if ((collision & 64) !== 64) boxman.setX(boxman.getX() + boxman.getHSpeed() / 2);
-            } else {
-                boxman.setX(boxman.getX() + boxman.getHSpeed());
+    if (boxman.getHSpeed() > 0 && (collision & 4) !== 4) {
+        if (crate.getX() === boxman.getX() + 32 && crate.getY() === boxman.getY()) {
+            if ((collision & 64) !== 64) {
+                crate.setX(crate.getX() + boxman.getHSpeed() / 2)
+                boxman.setX(boxman.getX() + boxman.getHSpeed() / 2);
             }
+        } else {
+            boxman.setX(boxman.getX() + boxman.getHSpeed());
         }
-        
-        if ((collision & 64) !== 64
-            && crate.can_interact
-            && crate.getX() > boxman.getX()
-            && crate.getX() + boxman.getHSpeed() > boxman.getX()) crate.setX(crate.getX() + boxman.getHSpeed() / 2);
-    } else if (boxman.getHSpeed() < 0) {
-        // Left
-        if ((collision & 8) !== 8) {
-            if (crate.getX() === boxman.getX() - 32 && crate.getY() === boxman.getY()) {
-                if ((collision & 128) !== 128) boxman.setX(boxman.getX() + boxman.getHSpeed() / 2);
-            } else {
-                boxman.setX(boxman.getX() + boxman.getHSpeed());
+    } else if (boxman.getHSpeed() < 0 &&(collision & 8) !== 8) {
+        if (crate.getX() === boxman.getX() - 32 && crate.getY() === boxman.getY()) {
+            if ((collision & 128) !== 128) {
+                crate.setX(crate.getX() + boxman.getHSpeed() / 2);
+                boxman.setX(boxman.getX() + boxman.getHSpeed() / 2);
             }
+        } else {
+            boxman.setX(boxman.getX() + boxman.getHSpeed());
         }
-        if ((collision & 128) !== 128
-            && crate.can_interact
-            && crate.getX() < boxman.getX()
-            && crate.getX() + boxman.getHSpeed() < boxman.getX()) crate.setX(crate.getX() + boxman.getHSpeed() / 2);
-    }
-    //////////////////////////////////////////
-    if (boxman.getVSpeed() > 0) {
-        // Down
-        if ((collision & 1) !== 1) {
-            if (crate.getY() === boxman.getY() + 32 && crate.getX() === boxman.getX()) {
-                if ((collision & 16) !== 16) boxman.setY(boxman.getY() + boxman.getVSpeed() / 2);
-            } else {
-                boxman.setY(boxman.getY() + boxman.getVSpeed());
+    } else if (boxman.getVSpeed() > 0 && (collision & 1) !== 1) {
+        if (crate.getY() === boxman.getY() + 32 && crate.getX() === boxman.getX()) {
+            if ((collision & 16) !== 16) {
+                crate.setY(crate.getY() + boxman.getVSpeed() / 2);
+                boxman.setY(boxman.getY() + boxman.getVSpeed() / 2);
             }
+        } else {
+            boxman.setY(boxman.getY() + boxman.getVSpeed());
         }
-        if ((collision & 16) !== 16
-            && crate.can_interact
-            && crate.getY() > boxman.getY()
-            && crate.getY() + boxman.getVSpeed() > boxman.getY()) crate.setY(crate.getY() + boxman.getVSpeed() / 2);
-    } else if (boxman.getVSpeed() < 0) {
-        // Up
-        if ((collision & 2) !== 2) {
-            if (crate.getY() === boxman.getY() - 32 && crate.getX() === boxman.getX()) {
-                if ((collision & 32) !== 32) boxman.setY(boxman.getY() + boxman.getVSpeed() / 2);
-            } else {
-                boxman.setY(boxman.getY() + boxman.getVSpeed());
+    } else if (boxman.getVSpeed() < 0 && (collision & 2) !== 2) {
+        if (crate.getY() === boxman.getY() - 32 && crate.getX() === boxman.getX()) {
+            if ((collision & 32) !== 32) {
+                crate.setY(crate.getY() + boxman.getVSpeed() / 2);
+                boxman.setY(boxman.getY() + boxman.getVSpeed() / 2);
             }
-        }
-        if ((collision & 32) !== 32
-            && crate.can_interact
-            && crate.getY() < boxman.getY()
-            && crate.getY() + boxman.getVSpeed() < boxman.getY()) {
-            crate.setY(crate.getY() + boxman.getVSpeed() / 2);
+        } else {
+            boxman.setY(boxman.getY() + boxman.getVSpeed());
         }
     }
 }
