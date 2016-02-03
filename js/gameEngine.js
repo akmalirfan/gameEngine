@@ -269,24 +269,6 @@ var entArray = [
     // Main character
     boxman =  Character("./img/mainChar.png", null),
     
-    // Invisible walls
-    invWalls1 = new Entity(),
-    invWalls2 = new Entity(),
-    invWalls3 = new Entity(),
-    invWalls4 = new Entity(),
-    invWalls5 = new Entity(),
-    invWalls6 = new Entity(),
-    invWalls7 = new Entity(),
-    invWalls8 = new Entity(),
-    invWalls9 = new Entity(),
-    invWalls10 = new Entity(),
-    invWalls11 = new Entity(),
-    invWalls12 = new Entity(),
-    invWalls13 = new Entity(),
-    invWalls14 = new Entity(),
-    invWalls15 = new Entity(),
-    invWalls16 = new Entity(),
-    
     // NPCs
     monstak = new Character("./img/monsta.png", 0),
     boxbiru = new Character("./img/npc_biru.png", 1),
@@ -343,7 +325,7 @@ tileNo = [
 ];
 
 // Function untuk pilih scene
-function gotoScene(scene) {
+function initScene(scene) {
     'use strict';
     
     currentScene = scene;
@@ -359,22 +341,6 @@ function gotoScene(scene) {
     if (scene === 0) {
         entArray = [
             boxman,
-            invWalls1,
-            invWalls2,
-            invWalls3,
-            invWalls4,
-            invWalls5,
-            invWalls6,
-            invWalls7,
-            invWalls8,
-            invWalls9,
-            invWalls10,
-            invWalls11,
-            invWalls12,
-            invWalls13,
-            invWalls14,
-            invWalls15,
-            invWalls16,
             monstak,
             boxbiru,
             kk,
@@ -397,44 +363,6 @@ function gotoScene(scene) {
         
         crate.setX(128);
         crate.setY(128);
-        
-        // Invisible walls
-        invWalls1.setX(64);
-        invWalls1.setY(256);
-        invWalls2.setX(96);
-        invWalls2.setY(256);
-        invWalls3.setX(128);
-        invWalls3.setY(256);
-        invWalls4.setX(160);
-        invWalls4.setY(256);
-        invWalls5.setX(192);
-        invWalls5.setY(256);
-        
-        invWalls6.setX(64);
-        invWalls6.setY(288);
-        invWalls7.setX(192);
-        invWalls7.setY(288);
-        
-        invWalls8.setX(64);
-        invWalls8.setY(320);
-        invWalls9.setX(192);
-        invWalls9.setY(320);
-        
-        invWalls10.setX(64);
-        invWalls10.setY(352);
-        invWalls11.setX(192);
-        invWalls11.setY(352);
-        
-        invWalls12.setX(64);
-        invWalls12.setY(384);
-        invWalls13.setX(96);
-        invWalls13.setY(384);
-        invWalls14.setX(128);
-        invWalls14.setY(384);
-        invWalls15.setX(160);
-        invWalls15.setY(384);
-        invWalls16.setX(192);
-        invWalls16.setY(384);
     } else if (scene === 1) {
         entArray = [
             boxman,
@@ -480,11 +408,11 @@ function drawCharacters() {
     var entArray_length = entArray.length;
     
     // Buang entity yang tak perlu draw
-    for (var i = 0; i < entArraySorted.length; i++) {
+    /*for (var i = 0; i < entArraySorted.length; i++) {
         if (entArraySorted[i].depth === undefined) {
             entArraySorted.splice(i, 1);
         }
-    }
+    }*/
     
     var entArraySorted_length = entArraySorted.length;
     
@@ -566,8 +494,7 @@ function movements() {
             dahlepas_inv = false;
         }
     } else {
-        //aligned = false;
-        aligned = true; // coba
+        aligned = false;
     }
 }
 
@@ -629,7 +556,7 @@ function motion() {
         } else {
             boxman.setX(boxman.getX() + boxman.getHSpeed());
         }
-    } else if (boxman.getHSpeed() < 0 &&(collision & 8) !== 8) {
+    } else if (boxman.getHSpeed() < 0 && (collision & 8) !== 8) {
         if (crate.getX() === boxman.getX() - 32 && crate.getY() === boxman.getY()) {
             if ((collision & 128) !== 128) {
                 crate.setX(crate.getX() + boxman.getHSpeed() / 2);
@@ -701,8 +628,7 @@ function collisionCheck(box_x, box_y) {
         
         // Uji collision
         // LRUDLRUD
-        //if (entArray2[ent].getInView() && entArray2[ent] !== crate) {
-        if (entArray2[ent] !== crate) { // temporary fix
+        if (entArray2[ent].getInView() && entArray2[ent] !== crate) {
             if (entArray2[ent].getY() === boxman.getY()) {
                 if (entArray2[ent].getX() === boxman.getX() - 32) {
                     collision |= 8;
@@ -724,6 +650,52 @@ function collisionCheck(box_x, box_y) {
                     collision |= 16;
                 }
             }
+        }
+        
+        customCollision();
+    }
+}
+
+function customCollision() {
+    // Rumah, dinding atas / bawah
+    if (boxman.getX() >= 448 && boxman.getX() <= 576) {
+        if (boxman.getY() === 64) {
+            collision |= 1;
+        } else if (boxman.getY() === 192) {
+            if (boxman.getX() !== 512)
+                collision |= 1;
+        } else if (boxman.getY() === 96) {
+            collision |= 2;
+        } else if (boxman.getY() === 224) {
+            if (boxman.getX() !== 512)
+                collision |= 2;
+        }
+    }
+    
+    // Rumah, dinding tepi
+    if (boxman.getY() >= 96 && boxman.getY() <= 192) {
+        if (boxman.getX() === 416 || boxman.getX() === 576) {
+            collision |= 4;
+        } else if (boxman.getX() === 448 || boxman.getX() === 608) {
+            collision |= 8;
+        }
+    }
+    
+    // Kolam dari tepi
+    if (boxman.getY() >= 256 && boxman.getY() <= 384) {
+        if (boxman.getX() === 32) {
+            collision |= 4;
+        } else if (boxman.getX() === 224) {
+            collision |= 8;
+        }
+    }
+    
+    // Kolam dari atas/bawah
+    if (boxman.getX() >= 64 && boxman.getX() <= 192) {
+        if (boxman.getY() === 224) {
+            collision |= 1;
+        } else if (boxman.getY() === 416) {
+            collision |= 2;
         }
     }
 }
@@ -928,18 +900,16 @@ function tulis(text, player, NPC) {
                 if (vy - 1 >= 0) vy -= 1;
             }
         }*/
-    } /*else {
-        if (aligned) {
-            ctx.fillStyle = 'rgba(255, 255, 255, ' + NPC.legap + ')';
-            
-            ctx.save();
-            ctx.globalAlpha = NPC.legap;
-            ctx.fillStyle = 'rgb(255, 255, 255)';
-            ctx.restore();
-            
-            text_width = 24;
-            drawTextbox(player, NPC, text_width);
-        }
+    } /*else if (aligned) {
+        ctx.fillStyle = 'rgba(255, 255, 255, ' + NPC.legap + ')';
+
+        ctx.save();
+        ctx.globalAlpha = NPC.legap;
+        ctx.fillStyle = 'rgb(255, 255, 255)';
+        ctx.restore();
+
+        text_width = 24;
+        drawTextbox(player, NPC, text_width);
     }*/
 }
 
@@ -994,8 +964,7 @@ function scene0() {
     
     // Tetapkan depth
     boxman.depth = -boxman.getY();
-    if (monstak !== undefined) // coba
-        monstak.depth = -monstak.getY();
+    monstak.depth = -monstak.getY();
     boxbiru.depth = -boxbiru.getY();
     kk.depth = -kk.getY();
     crate.depth = -crate.getY();
@@ -1010,8 +979,7 @@ function scene0() {
     
     // Tukar frame index monstak berdasarkan
     // kedudukan boxman
-    if (monstak !== undefined) // coba
-        monstak.frame_row = (boxman.getX() > monstak.getX()) ? 0 : 4;
+    monstak.frame_row = (boxman.getX() > monstak.getX()) ? 0 : 4;
     
     // Tukar frame index kk berdasarkan
     // kedudukan boxman
@@ -1211,5 +1179,5 @@ window.addEventListener('resize', function() {
     resizeCanvas = true;
 }, false);
 
-gotoScene(0);
+initScene(0);
 gameLoop();
