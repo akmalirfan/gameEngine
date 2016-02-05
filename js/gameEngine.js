@@ -20,6 +20,9 @@ var interval = 1000 / 60,
     initHeight = 224,
     scale = 1,
     
+    // Untuk draw
+    default_h = 32,
+
     box_x,
     box_y,
     
@@ -92,6 +95,8 @@ function Entity() {
     // Private variables
     var x,
         y,
+        w = 32,
+        h = 32,
         hspeed = 0,
         vspeed = 0,
         inView = false;
@@ -102,6 +107,12 @@ function Entity() {
     }
     this.getY = function() {
         return y;
+    }
+    this.getW = function() {
+        return w;
+    }
+    this.getH = function() {
+        return h;
     }
     this.getHSpeed = function() {
         return hspeed;
@@ -120,6 +131,12 @@ function Entity() {
     this.setY = function(Y) {
         y = Y;
     }
+    this.setW = function(W) {
+        w = W;
+    }
+    this.setH = function(H) {
+        h = H;
+    }
     this.setHSpeed = function(hs) {
         hspeed = hs;
     }
@@ -133,44 +150,45 @@ function Entity() {
 
 // Character object, derived from Entity
 function Character(img_src, textID) {
-  'use strict';
-  //var Char = Object.create(Entity);
-  var Char = new Entity();
-  
-  Char.sprite = new Image();
-  if (img_src !== null) Char.sprite.src = img_src;
-  Char.arah_hor = 0; // 0(kanan) 1(kiri) >> nak guna tribool?
-  Char.arah_ver = 0; // 0(bawah) 1(atas)
-  Char.frame_row = 0;
-  Char.frame_column = 0;
-  Char.pelambat = 0;
-  Char.depth = 0;
-  Char.textID = textID;
-  Char.text = 0;
-  Char.draw = function() {
-    //drawImage(image,sx,sy,sw,sh,dx,dy,dw,dh)
-    if (img_src !== null) {
-      ctx.drawImage(
-        Char.sprite,
-        Char.frame_column * 32,
-        Char.frame_row * 32,
-        32,
-        32,
-        Char.getX() - vx,
-        Char.getY() - vy,
-        32,
-        32
-      );
-    }
-  };
+    'use strict';
+    //var Char = Object.create(Entity);
+    var Char = new Entity();
 
-  /// BERKAITAN CHAT ENGINE ///
-  Char.legap = 0;
+    Char.sprite = new Image();
+    Char.sprite.src = img_src;
+    Char.arah_hor = 0; // 0(kanan) 1(kiri) >> nak guna tribool?
+    Char.arah_ver = 0; // 0(bawah) 1(atas)
+    Char.frame_row = 0;
+    Char.frame_column = 0;
+    Char.pelambat = 0;
+    Char.depth = 0;
+    Char.textID = textID;
+    Char.text = 0;
+    Char.draw = function() {
+        var width = Char.getW();
+        var height = Char.getH();
 
-  Char.can_interact = false;
-  Char.tukar = 0;
-  
-  return Char;
+        //drawImage(image,sx,sy,sw,sh,dx,dy,dw,dh)
+        ctx.drawImage(
+            Char.sprite,
+            Char.frame_column * width,
+            Char.frame_row * height,
+            width,
+            height,
+            Char.getX() - vx,
+            Char.getY() - vy - height + default_h,
+            width,
+            height
+        );
+    };
+
+    /// BERKAITAN CHAT ENGINE ///
+    Char.legap = 0;
+
+    Char.can_interact = false;
+    Char.tukar = 0;
+
+    return Char;
 }
 
 // Item constructor
@@ -271,11 +289,14 @@ var entArray = [
     // NPCs
     monstak = new Character("./img/monsta.png", 0),
     boxbiru = new Character("./img/npc_biru.png", 1),
-    kk = new Character("./img/kk.png", 2),
+    //kk = new Character("./img/kk.png", 2),
+    kk = new Character("./img/kk2.png", 2),
     
     // Objects
     crate = new Character("./img/crate.png", null)
 ];
+
+kk.setH(48);
 
 // Sama macam entArray cuma takde boxman
 var entArray2 = entArray.slice(1);
