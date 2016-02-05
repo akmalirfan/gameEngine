@@ -16,7 +16,6 @@ var interval = 1000 / 60,
     cameraCounter = 0,
     
     // Untuk resize canvas
-    resizeCanvas = true,
     initWidth = 352,
     initHeight = 224,
     scale = 1,
@@ -399,38 +398,26 @@ function drawTiles(row, column, scene, layer, tileset) {
     }
 }
 
-// Copy of entArray
-var entArraySorted = entArray.slice();
-
 // Function untuk draw watak ikut depth
 function drawCharacters() {
     'use strict';
     var entArray_length = entArray.length;
-    
-    // Buang entity yang tak perlu draw
-    /*for (var i = 0; i < entArraySorted.length; i++) {
-        if (entArraySorted[i].depth === undefined) {
-            entArraySorted.splice(i, 1);
-        }
-    }*/
-    
-    var entArraySorted_length = entArraySorted.length;
-    
+
     // Susun entities ikut depth
-    entArraySorted.sort(function(a, b) {
+    entArray.sort(function(a, b) {
         return b.depth - a.depth;
     });
     
     // Lukis ikut turutan
-    for (var i = 0; i < entArraySorted_length; i++) {
-        if (entArraySorted[i].getX()-vx >= -32
-            && entArraySorted[i].getX()-vx < initWidth
-            && entArraySorted[i].getY()-vy >= -32
-            && entArraySorted[i].getY()-vy < initHeight) {
-            entArraySorted[i].setInView(true);
-            entArraySorted[i].draw();
+    for (var i = 0; i < entArray_length; i++) {
+        if (entArray[i].getX()-vx >= -32
+            && entArray[i].getX()-vx < initWidth
+            && entArray[i].getY()-vy >= -32
+            && entArray[i].getY()-vy < initHeight) {
+            entArray[i].setInView(true);
+            entArray[i].draw();
         } else {
-            entArraySorted[i].setInView(false);
+            entArray[i].setInView(false);
         }
     }
 }
@@ -670,6 +657,21 @@ function customCollision() {
             if (boxman.getX() !== 512)
                 collision |= 2;
         }
+
+        // crate
+        if (crate.can_interact) {
+            if (boxman.getY() === 32 && crate.getY() === 64) {
+                collision |= 16;
+            } else if (boxman.getY() === 160 && crate.getY() === 192) {
+                if (boxman.getX() !== 512)
+                    collision |= 16;
+            } else if (boxman.getY() === 128 && crate.getY() === 96) {
+                collision |= 32;
+            } else if (boxman.getY() === 256 && crate.getY() === 224) {
+                if (boxman.getX() !== 512)
+                    collision |= 32;
+            }
+        }
     }
     
     // Rumah, dinding tepi
@@ -678,6 +680,17 @@ function customCollision() {
             collision |= 4;
         } else if (boxman.getX() === 448 || boxman.getX() === 608) {
             collision |= 8;
+        }
+
+        // crate
+        if (crate.can_interact) {
+            if ((boxman.getX() === 384 && crate.getX() === 416)
+                || (boxman.getX() === 544 && crate.getX() === 576)) {
+                collision |= 4;
+            } else if ((boxman.getX() === 480 && crate.getX() === 448)
+                       || (boxman.getX() === 640 && crate.getX() === 608)) {
+                collision |= 8;
+            }
         }
     }
     
@@ -688,6 +701,15 @@ function customCollision() {
         } else if (boxman.getX() === 224) {
             collision |= 8;
         }
+
+        // crate
+        if (crate.can_interact) {
+            if (boxman.getX() === 0 && crate.getX() === 32) {
+                collision |= 4;
+            } else if (boxman.getX() === 256 && crate.getX() === 224) {
+                collision |= 8;
+            }
+        }
     }
     
     // Kolam dari atas/bawah
@@ -696,6 +718,15 @@ function customCollision() {
             collision |= 1;
         } else if (boxman.getY() === 416) {
             collision |= 2;
+        }
+
+        // crate
+        if (crate.can_interact) {
+            if (boxman.getY() === 192 && crate.getY() === 224) {
+                collision |= 1;
+            } else if (boxman.getY() === 448 && crate.getY() === 416) {
+                collision |= 2;
+            }
         }
     }
 }
@@ -915,30 +946,7 @@ function tulis(text, player, NPC) {
 
 function gameLoop() {
     'use strict';
-    
-    if (resizeCanvas) {
-        if (window.innerHeight < window.innerWidth) {
-            scale = Math.floor(window.innerHeight / initHeight);
-        } else {
-            scale = Math.floor(window.innerWidth / initWidth);
-        }
-        
-        canvas.width = initWidth * scale;
-        canvas.height = initHeight * scale;
-        
-        console.log(canvas.width + "x" + canvas.height);
-        
-        // Ketengahkan canvas
-        canvas.style.left = window.innerWidth / 2 - canvas.width / 2 + 'px';
-        canvas.style.top = window.innerHeight / 2 - canvas.height / 2 + 'px';
-        
-        ctx.imageSmoothingEnabled = false;
-        
-        ctx.scale(scale, scale);
-        
-        resizeCanvas = false;
-    }
-    
+
     setTimeout(function() {
         window.requestAnimationFrame(gameLoop);
     }, interval);
@@ -1175,9 +1183,29 @@ document.addEventListener('keyup', function (event) {
     }
 });
 
-window.addEventListener('resize', function() {
-    resizeCanvas = true;
-}, false);
+function resizeCanvas() {
+    if (window.innerHeight < window.innerWidth) {
+        scale = Math.floor(window.innerHeight / initHeight);
+    } else {
+        scale = Math.floor(window.innerWidth / initWidth);
+    }
+
+    canvas.width = initWidth * scale;
+    canvas.height = initHeight * scale;
+
+    console.log(canvas.width + "x" + canvas.height);
+
+    // Ketengahkan canvas
+    canvas.style.left = window.innerWidth / 2 - canvas.width / 2 + 'px';
+    canvas.style.top = window.innerHeight / 2 - canvas.height / 2 + 'px';
+
+    ctx.imageSmoothingEnabled = false;
+
+    ctx.scale(scale, scale);
+}
+
+window.addEventListener('resize', resizeCanvas, false);
 
 initScene(0);
 gameLoop();
+resizeCanvas();
