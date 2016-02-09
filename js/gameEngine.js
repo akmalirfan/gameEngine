@@ -31,10 +31,8 @@ var interval = 1000 / 60,
     
     bezaX,
     bezaY,
-    left = false,
-    right = false,
-    up = false,
-    down = false,
+    dpad = 0,
+    arrowkey = 0,
     space = false,
     inv = false,
     
@@ -306,8 +304,6 @@ tile2.src = "./img/tile2.png";
 bubble.src = "./img/speech_bubble3.png";
 typeface.src = "./img/gohufont_sprite.png";
 
-// Insert polyfill here
-
 // tileNo[currentScene][layer][baris]
 tileNo = [
     [ // scene0 /////////////////////////////////////////////////////////////////////
@@ -449,54 +445,35 @@ function movements() {
     if (boxman.getX() % 32 === 0 && boxman.getY() % 32 === 0) {
         aligned = true;
         
-        if (up) {
-            boxman.frame_column = 1;
-            boxman.arah_ver = 1;
-            boxman.frame_row = 0 + 4 * boxman.arah_ver;
-        }
-        
-        if (down) {
-            boxman.frame_column = 1;
-            boxman.arah_ver = 0;
-            boxman.frame_row = 0 + 4 * boxman.arah_ver;
-        }
-        
-        if (left) {
+        if ((arrowkey & 8) === 8) {
             boxman.frame_column = 0;
             boxman.arah_hor = 1;
             boxman.frame_row = 0 + 4 * boxman.arah_hor;
-        }
-        
-        if (right) {
+            boxman.setHSpeed(-2);
+        } else if ((arrowkey & 4) === 4) {
             boxman.frame_column = 0;
             boxman.arah_hor = 0;
             boxman.frame_row = 0 + 4 * boxman.arah_hor;
+            boxman.setHSpeed(2);
+        } else if ((arrowkey & 2) === 2) {
+            boxman.frame_column = 1;
+            boxman.arah_ver = 1;
+            boxman.frame_row = 0 + 4 * boxman.arah_ver;
+            boxman.setVSpeed(-2);
+        } else if ((arrowkey & 1) === 1) {
+            boxman.frame_column = 1;
+            boxman.arah_ver = 0;
+            boxman.frame_row = 0 + 4 * boxman.arah_ver;
+            boxman.setVSpeed(2);
         }
         
-        if (!up && !down) { // disable diagonal movements
-            if (left) {
-                boxman.setHSpeed(-2);
-            }
-            
-            if (right) {
-                boxman.setHSpeed(2);
-            }
-        }
+        if ((arrowkey & 12) === 0)
+            boxman.setHSpeed(0);
         
-        if (!left && !right) { // disable diagonal movements
-            if (up) {
-                boxman.setVSpeed(-2);
-            }
-            
-            if (down) {
-                boxman.setVSpeed(2);
-            }
-        }
+        if ((arrowkey & 3) === 0)
+            boxman.setVSpeed(0);
         
-        if (!left && !right) boxman.setHSpeed(0);
-        
-        if (!up && !down) boxman.setVSpeed(0);
-        
+        // This is out of place
         if (dahlepas_inv && inv) {
             currentScene = 5;
             dahlepas_inv = false;
@@ -509,46 +486,30 @@ function movements() {
 // Guna semasa dalam menu
 function navigate() {
     'use strict';
-    
-    blhtekan:
-    if (boleh_tekan) {
-        // Row
-        if (up) {
-            row = (row === 0) ? 4 : row - 1;
-            boleh_tekan = false;
-            break blhtekan;
-        }
 
-        if (down) {
+    if (boleh_tekan) {
+        if ((arrowkey & 2) === 2) {
+            row = (row === 0) ? 4 : row - 1;
+        } else if ((arrowkey & 1) === 1) {
             row = (row + 1) % 5;
-            boleh_tekan = false;
-            break blhtekan;
+        } else if ((arrowkey & 12) >= 4) {
+            col = col - dpad & 3;
+            dpad = 0;
         }
         
-        // Column
-        if (left) {
-            col = (col === 0) ? 3 : col - 1;
-            boleh_tekan = false;
-            break blhtekan;
-        }
-
-        if (right) {
-            col = (col + 1) % 4;
-            boleh_tekan = false;
-            break blhtekan;
-        }
+        boleh_tekan = false;
     }
     
-    if (!(up || down || left || right)) boleh_tekan = true;
+    if (arrowkey === 0)
+        boleh_tekan = true;
     
     ctx.fillStyle = '#FFFFFF';
     ctx.fillRect(12 + 40 * col, 24 + 40 * row, 32, 32);
     ctx.fillStyle = '#707070';
     ctx.fillRect(13 + 40 * col, 25 + 40 * row, 30, 30);
     
-    if (inv_arr[col + row * 4] !== undefined) {
+    if (inv_arr[col + row * 4] !== undefined)
         inv_arr[col + row * 4].describe();
-    }
 }
 
 // Gerakkan boxman dan crate
@@ -1162,16 +1123,18 @@ document.addEventListener('keydown', function (event) {
             
             break;
         case 37:
-            left = true;
+            arrowkey |= 8;
+            dpad = 37;
             break;
         case 38:
-            up = true;
+            arrowkey |= 2;
             break;
         case 39:
-            right = true;
+            arrowkey |= 4;
+            dpad = 39;
             break;
         case 40:
-            down = true;
+            arrowkey |= 1;
             break;
         case 73:
             inv = true;
@@ -1186,16 +1149,16 @@ document.addEventListener('keyup', function (event) {
             dahlepas_space = true;
             break;
         case 37:
-            left = false;
+            arrowkey &= -9;
             break;
         case 38:
-            up = false;
+            arrowkey &= -3;
             break;
         case 39:
-            right = false;
+            arrowkey &= -5;
             break;
         case 40:
-            down = false;
+            arrowkey &= -2;
             break;
         case 73:
             inv = false;
