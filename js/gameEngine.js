@@ -184,7 +184,7 @@ function Character(img_src, textID) {
     Char.legap = 0;
 
     Char.can_interact = false;
-    Char.tukar = 0;
+    Char.tukar = -1;
 
     return Char;
 }
@@ -588,7 +588,7 @@ function collisionCheck(box_x, box_y) {
             
             if (entArray2[ent] !== crate && entArray2[ent].sprite !== undefined) {
                 enpisi = entArray2[ent];
-                if (space) sdgcakap = (enpisi.tukar === 0) ? false : true;
+                if (space) sdgcakap = (enpisi.tukar === -1) ? false : true;
             }
         } else {
             entArray2[ent].can_interact = false;
@@ -715,12 +715,13 @@ function customCollision() {
 
 function drawTextbox(player, NPC, ygbercakap_x, ygbercakap_y, text_width) {
     var x1, y1, x2, y2;
-    var bubbleheight = 44 - (text[NPC.textID][NPC.text][NPC.tukar].length > 22 ? 0 : 11);
+    var extrabaris = text[NPC.textID][NPC.text][NPC.tukar].length > 21 ? 0 : 11;
+    var bubbleheight = 44 - extrabaris;
     
     if (player.getX() !== NPC.getX()) {
-        if (NPC.tukar !== 0) {
+        if (NPC.tukar !== -1) {
             x1 = ygbercakap_x - vx + 16 - (text_width / 2 + 10);
-            y1 = ygbercakap_y - vy - 57 + (text[NPC.textID][NPC.text][NPC.tukar].length > 22 ? 0 : 11);
+            y1 = ygbercakap_y - vy - 57 + extrabaris;
             x2 = ygbercakap_x - vx + 16 + (text_width / 2 + 10);
             y2 = ygbercakap_y - vy - 13;
             
@@ -734,11 +735,11 @@ function drawTextbox(player, NPC, ygbercakap_x, ygbercakap_y, text_width) {
             ctx.drawImage(bubble, 20, 42, 10, 7, ygbercakap_x - vx + 11, y2 - 2, 10, 7); // segi tiga
         }
     } else { // player.getX() === NPC.getX()
-        if (NPC.tukar !== 0) {
+        if (NPC.tukar !== -1) {
             if ((ygbercakap_y === NPC.getY() && NPC.getY() < player.getY())
                 || (ygbercakap_y === player.getY() && NPC.getY() > player.getY())) {
                 x1 = ygbercakap_x - vx + 16 - (text_width / 2 + 10);
-                y1 = ygbercakap_y - vy - 57 + (text[NPC.textID][NPC.text][NPC.tukar].length > 22 ? 0 : 11);
+                y1 = ygbercakap_y - vy - 57 + extrabaris;
                 x2 = ygbercakap_x - vx + 16 + (text_width / 2 + 10);
                 y2 = ygbercakap_y - vy - 13;
 
@@ -782,13 +783,13 @@ function textToBekas(bekasIndex, text) {
 // LUKIS TEXTBOX + 'TULIS' ////////////////
 function tulis(text, player, NPC) {
     'use strict';
-    sdgcakap = (NPC.tukar === 0) ? false : true;
+    sdgcakap = (NPC.tukar === -1) ? false : true;
     
     //NPC.legap += 0.1;
     //if (NPC.legap > 1) NPC.legap = 1; // hadkan nilai legap
     
     if (sdgcakap) {
-        var ygbercakap = (text[NPC.tukar][21] === '#') ? NPC : player;
+        var ygbercakap = (text[NPC.tukar][0] === '#') ? NPC : player;
         
         var text_width; //lebar dalam pixel
         text_width = ((var_panjang[0] > var_panjang[1]) ? var_panjang[0] : var_panjang[1]) * char_width;
@@ -806,21 +807,28 @@ function tulis(text, player, NPC) {
         if (player.getX() === NPC.getX()
             && ((ygbercakap === player && NPC.getY() < player.getY())
                 || (ygbercakap === NPC && NPC.getY() > player.getY()))) {
-            string_reg_y = ygbercakap.getY() + 56; //46+32-char_height*2= 56    
+            string_reg_y = ygbercakap.getY() + 56; //46+32-char_height*2= 56
         } else {
-            string_reg_y = ygbercakap.getY() - 46 + (text[NPC.tukar].length > 22 ? 0 : 11); //13 + char_height*3 = 46
+            string_reg_y = ygbercakap.getY() - 46 + (text[NPC.tukar].length > 21 ? 0 : 11); //13 + char_height*3 = 46
         }
 
         var i;
+        var tengah = 21;
 
         // panjang_teks untuk simpan bil aksara
-        panjang_teks = text[NPC.tukar].substring(0, 21).trim().length;
+        if (text[NPC.tukar][tengah] !== undefined) {
+            while (text[NPC.tukar][tengah] !== ' ')
+                tengah--;
+        }
+
+        panjang_teks = text[NPC.tukar].substring(1, tengah).length;
 
         // kosongkan bekas sebelum isi nombor baru
         bekas[0] = [];
 
+        // Untuk simpan bilangan aksara semasa yang dipaparkan
         var_panjang[0] += (var_panjang[0] < panjang_teks) ? 1 : 0;
-        textToBekas(0, text[NPC.tukar].substring(0, var_panjang[0]));
+        textToBekas(0, text[NPC.tukar].substring(1, var_panjang[0] + 1));
         
         // Tulis!
         for (i = 0; i < var_panjang[0]; i++) {
@@ -841,14 +849,14 @@ function tulis(text, player, NPC) {
         
         // kalau line yg pertama dah habis tulis
         if (var_panjang[0] === panjang_teks) {
-            panjang_teks = text[NPC.tukar].substring(22).length; //bil aksara
+            panjang_teks = text[NPC.tukar].substring(tengah + 1).length; //bil aksara
             
             // kosongkan bekas sebelum isi nombor baru
             bekas[1] = [];
             
             var_panjang[1] += (var_panjang[1] < panjang_teks) ? 1 : 0;
             
-            textToBekas(1, text[NPC.tukar].substring(22, 22 + var_panjang[1]));
+            textToBekas(1, text[NPC.tukar].substring(tengah + 1, tengah + 1 + var_panjang[1]));
 
             string_reg_x = ygbercakap.getX() - vx + 16 - var_panjang[1] * char_width / 2;
 
@@ -1001,7 +1009,7 @@ function scene0() {
             vy += bezaY;
         }
     } else {
-        console.log(text[enpisi.textID][enpisi.text][enpisi.tukar]);
+        //console.log(text[enpisi.textID][enpisi.text][enpisi.tukar]);
         
         tulis(
             text[enpisi.textID][enpisi.text],
@@ -1085,41 +1093,42 @@ function inventory() {
     }
 } //inventory
 
+function converse() {
+    "use strict";
+
+    if (currentScene !== 5 && aligned && enpisi !== undefined && enpisi.can_interact
+        && dahlepas_space && var_panjang[1] === panjang_teks) {
+        // Kosongkan var_panjang
+        var_panjang = [0,0];
+
+        // Kalau player menghadap ke NPC
+        if ((boxman.getX() === enpisi.getX() && boxman.frame_column === 1) ||
+            (boxman.getY() === enpisi.getY() && boxman.frame_column === 0)) {
+            if (enpisi.tukar < text[enpisi.textID][enpisi.text].length - 1) {
+                enpisi.tukar += 1;
+            } else {
+                panjang_teks = 0;
+                enpisi.tukar = -1;
+
+                if (enpisi === kk && kk.text === 0) {
+                    masuk(tangga);
+                    kk.text = 1;
+                } else if (enpisi === monstak && monstak.text === 0) {
+                    monstak.text = 1;
+                } else if (enpisi === boxbiru && boxbiru.text === 0) {
+                    boxbiru.text = 1;
+                }
+            }
+        }
+        dahlepas_space = false;
+    }
+}
+
 document.addEventListener('keydown', function (event) {
     switch (event.keyCode) {
         case 32:
             space = true;
-            
-            // If aligned to grid
-            if (aligned) {
-                if (enpisi !== undefined && enpisi.can_interact && dahlepas_space && var_panjang[1] === panjang_teks) {
-                    // Kosongkan var_panjang
-                    var_panjang = [0,0];
-                    
-                    if (enpisi.textID !== undefined) {
-                        // Kalau player menghadap ke NPC
-                        if ((boxman.getX() === enpisi.getX() && boxman.frame_column === 1) ||
-                            (boxman.getY() === enpisi.getY() && boxman.frame_column === 0)) {
-                            if (enpisi.tukar < text[enpisi.textID][enpisi.text].length - 1) {
-                                enpisi.tukar += 1;
-                            } else {
-                                panjang_teks = 0;
-                                enpisi.tukar = 0;
-                                
-                                if (enpisi === kk && kk.text === 0) {
-                                    masuk(tangga);
-                                    kk.text = 1;
-                                } else if (enpisi === monstak && monstak.text === 0) {
-                                    monstak.text = 1;
-                                } else if (enpisi === boxbiru && boxbiru.text === 0) {
-                                    boxbiru.text = 1;
-                                }
-                            }
-                        }
-                    }
-                    dahlepas_space = false;
-                }
-            }
+            converse();
             
             break;
         case 37:

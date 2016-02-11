@@ -4,55 +4,43 @@
 var text = [
     [ //monstak
         [
-            "", // biarkan kosong
-            
-            "Siapa                #kau?",
-            "Nama aku             @Irfan",
-            "Aku tak pernah nampak#kau kat sini",
-            "Aku orang            @baru",
-            "Lebih baik kau       #berhati-hati",
-            "Tempat ni            #bahaya!",
-            "Ohh..                @Baiklah"
+            "#Siapa kau?",
+            "@Nama aku Irfan",
+            "#Aku tak pernah nampak kau kat sini",
+            "@Aku orang baru",
+            "#Lebih baik kau berhati-hati",
+            "#Tempat ni bahaya!",
+            "@Ohh.. Baiklah"
         ],
         [
-            "", // biarkan kosong
-            
-            "Hati-hati            #tau",
-            "Baik.                @Terima kasih"
+            "#Hati-hati tau",
+            "@Baik. Terima kasih"
         ]
     ],
     [ //boxbiru
         [
-            "", // biarkan kosong
-            
-            "Kau buat             @apa?",
-            "Siram                #rumput",
-            "Okay.                @Teruskan"
+            "@Kau buat apa?",
+            "#Siram rumput",
+            "@Okay. Teruskan"
         ],
         [
-            "", // biarkan kosong
-            
-            "Mana                 @airnya?",
-            "Ada. Kau je          #tak nampak",
-            "...                  @",
-            "...                  #",
-            "...                  @"
+            "@Mana airnya?",
+            "#Ada. Kau je tak nampak",
+            "@...",
+            "#...",
+            "@..."
         ]
     ],
     [ //kk
         [ // 0
-            "", // biarkan kosong
-            
-            "Nah                  #tangga",
-            "Kenapa bagi          @aku?",
-            "Saja                 #je",
-            "Err..                @Terima kasih"
+            "#Nah tangga",
+            "@Kenapa bagi aku?",
+            "#Saja je",
+            "@Err.. Terima kasih"
         ],
         [ // 1
-            "", // biarkan kosong
-            
-            "Berguna tak          #tangga tu?",
-            "Aku tak guna         @pun lagi"
+            "#Berguna tak tangga tu?",
+            "@Aku tak guna pun lagi"
         ]
     ],
     [ //barang-barang
