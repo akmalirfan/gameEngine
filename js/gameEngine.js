@@ -580,15 +580,16 @@ function collisionCheck(box_x, box_y) {
     var entArray2_length = entArray2.length;
     for (var ent = 0; ent < entArray2_length; ent++) {
         // Uji jarak boleh bercakap
-        if (((boxman.getX() === entArray2[ent].getX()-32 || boxman.getX() === entArray2[ent].getX()+32)
-            && (boxman.getY() === entArray2[ent].getY()))
-            || ((boxman.getX() === entArray2[ent].getX())
-            && (boxman.getY() === entArray2[ent].getY()-32 || boxman.getY() === entArray2[ent].getY()+32))) {
+        if ((Math.abs(boxman.getX() - entArray2[ent].getX()) === 32
+             && boxman.getY() === entArray2[ent].getY() && boxman.frame_column === 0)
+            || (boxman.getX() === entArray2[ent].getX() && boxman.frame_column === 1
+            && Math.abs(boxman.getY() - entArray2[ent].getY()) === 32)) {
             entArray2[ent].can_interact = true;
             
-            if (entArray2[ent] !== crate && entArray2[ent].sprite !== undefined) {
+            if (entArray2[ent] !== crate) {
                 enpisi = entArray2[ent];
-                if (space) sdgcakap = (enpisi.tukar === -1) ? false : true;
+                if (space)
+                    sdgcakap = (enpisi.tukar !== -1);
             }
         } else {
             entArray2[ent].can_interact = false;
@@ -783,7 +784,7 @@ function textToBekas(bekasIndex, text) {
 // LUKIS TEXTBOX + 'TULIS' ////////////////
 function tulis(text, player, NPC) {
     'use strict';
-    sdgcakap = (NPC.tukar === -1) ? false : true;
+    sdgcakap = (NPC.tukar !== -1);
     
     //NPC.legap += 0.1;
     //if (NPC.legap > 1) NPC.legap = 1; // hadkan nilai legap
@@ -991,7 +992,8 @@ function scene0() {
         box_y = boxman.getY();
         
         // If aligned to grid
-        if (aligned) collisionCheck(box_x, box_y);
+        if (aligned)
+            collisionCheck(box_x, box_y);
         
         // Gerakkan boxman dan crate
         motion();
@@ -1096,27 +1098,24 @@ function inventory() {
 function converse() {
     "use strict";
 
-    if (currentScene !== 5 && aligned && enpisi !== undefined && enpisi.can_interact
+    if (currentScene !== 5 && enpisi !== undefined && enpisi.can_interact
         && dahlepas_space && var_panjang[1] === panjang_teks) {
         // Kosongkan var_panjang
         var_panjang = [0,0];
 
-        // Kalau player menghadap ke NPC
-        if ((boxman.getX() === enpisi.getX() && boxman.frame_column === 1) ||
-            (boxman.getY() === enpisi.getY() && boxman.frame_column === 0)) {
-            if (enpisi.tukar < text[enpisi.textID][enpisi.text].length - 1) {
-                enpisi.tukar += 1;
-            } else {
-                panjang_teks = 0;
-                enpisi.tukar = -1;
-
-                if (enpisi === kk && kk.text === 0) {
-                    masuk(tangga);
-                    kk.text = 1;
-                } else if (enpisi === monstak && monstak.text === 0) {
-                    monstak.text = 1;
-                } else if (enpisi === boxbiru && boxbiru.text === 0) {
-                    boxbiru.text = 1;
+        if (enpisi.tukar < text[enpisi.textID][enpisi.text].length - 1) {
+            enpisi.tukar += 1;
+        } else {
+            panjang_teks = 0;
+            enpisi.tukar = -1;
+            
+            if (enpisi.text === 0) {
+                switch (enpisi) {
+                    case kk:
+                        masuk(tangga);
+                    case monstak:
+                    case boxbiru:
+                        enpisi.text = 1;
                 }
             }
         }
@@ -1129,7 +1128,6 @@ document.addEventListener('keydown', function (event) {
         case 32:
             space = true;
             converse();
-            
             break;
         case 37:
             arrowkey |= 8;
