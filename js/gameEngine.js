@@ -54,6 +54,7 @@ var interval = 1000 / 60,
     
     // Collision detection
     aligned = false,
+    grid = 32,
     collision = 0,
     
     // Variables untuk dialog
@@ -89,104 +90,71 @@ for (i = 1; i <= 9; i++) {
 sineTblBerubah_length = sineTblBerubah.length;
 
 // Entity object
-function Entity() {
-    // Private variables
-    var x,
-        y,
-        w = 32,
-        h = 32,
-        hspeed = 0,
-        vspeed = 0,
-        inView = false;
+let Entity = {
+    x: null,
+    y: null,
+    w: 32,
+    h: 32,
+    hspeed: 0,
+    vspeed: 0,
+    inView: false,
     
     // Getters
-    this.getX = function() {
-        return x;
-    }
-    this.getY = function() {
-        return y;
-    }
-    this.getW = function() {
-        return w;
-    }
-    this.getH = function() {
-        return h;
-    }
-    this.getHSpeed = function() {
-        return hspeed;
-    }
-    this.getVSpeed = function() {
-        return vspeed;
-    }
-    this.getInView = function() {
-        return inView;
-    }
+    getX() { return this.x },
+    getY() { return this.y },
+    getW() { return this.w },
+    getH() { return this.h },
+    getHSpeed() { return this.hspeed },
+    getVSpeed() { return this.vspeed },
+    getInView() { return this.inView },
     
     // Setters
-    this.setX = function(X) {
-        x = X;
-    }
-    this.setY = function(Y) {
-        y = Y;
-    }
-    this.setW = function(W) {
-        w = W;
-    }
-    this.setH = function(H) {
-        h = H;
-    }
-    this.setHSpeed = function(hs) {
-        hspeed = hs;
-    }
-    this.setVSpeed = function(vs) {
-        vspeed = vs;
-    }
-    this.setInView = function(iv) {
-        inView = iv;
-    }
+    setX(X) { this.x = X },
+    setY(Y) { this.y = Y },
+    setW(W) { this.w = W },
+    setH(H) { this.h = H },
+    setHSpeed(hs) { this.hspeed = hs },
+    setVSpeed(vs) { this.vspeed = vs },
+    setInView(iv) { this.inView = iv }
 }
 
 // Character object, derived from Entity
-function Character(img_src, textID) {
-    'use strict';
-    //var Char = Object.create(Entity);
-    var Char = new Entity();
-
-    Char.sprite = new Image();
-    Char.sprite.src = img_src;
-    Char.arah_hor = 0; // 0(kanan) 1(kiri) >> nak guna tribool?
-    Char.arah_ver = 0; // 0(bawah) 1(atas)
-    Char.frame_row = 0;
-    Char.frame_column = 0;
-    Char.pelambat = 0;
-    Char.depth = 0;
-    Char.textID = textID;
-    Char.text = 0;
-    Char.draw = function() {
-        var width = Char.getW();
-        var height = Char.getH();
+let Character = function(img_src, txtID) {
+    let char = Object.assign(Object.create(Entity), {
+        arah_hor: 0,
+        arah_ver: 0,
+        frame_row: 0,
+        frame_column: 0,
+        pelambat: 0,
+        depth: 0,
+        textID: txtID,
+        text: 0,
+        legap: 0,
+        can_interact: false,
+        tukar: -1
+    });
+    
+    char.sprite = new Image();
+    char.sprite.src = img_src;
+    char.draw = function() {
+        let width = this.getW();
+        let height = this.getH();
 
         //drawImage(image,sx,sy,sw,sh,dx,dy,dw,dh)
         ctx.drawImage(
-            Char.sprite,
-            Char.frame_column * width,
-            Char.frame_row * height,
+            this.sprite,
+            this.frame_column * width,
+            this.frame_row * height,
             width,
             height,
-            Char.getX() - vx,
-            Char.getY() - vy - height + default_h,
+            this.getX() - vx,
+            this.getY() - vy - height + default_h,
             width,
             height
         );
-    };
-
-    /// BERKAITAN CHAT ENGINE ///
-    Char.legap = 0;
-
-    Char.can_interact = false;
-    Char.tukar = -1;
-
-    return Char;
+    }
+    
+    return char;
 }
 
 // Item constructor
@@ -250,9 +218,9 @@ function Item(img_src, name, stackable, textID, price) {
 // Barang-barang
 var tangga = new Item("./img/tangga.png", "Tangga", false, 0, 20),
     roti = new Item("./img/roti.png", "Roti", true, 1, 5),
-    kelapa = new Item("./img/kelapa.png", "Kelapa", true, 2, 10);
-    kelapa2 = new Item("./img/kelapa.png", "Kelapa2", true, 2, 10);
-    kelapa3 = new Item("./img/kelapa.png", "Kelapa3", true, 2, 10);
+    kelapa = new Item("./img/kelapa.png", "Kelapa", true, 2, 10),
+    kelapa2 = new Item("./img/kelapa.png", "Kelapa2", true, 2, 10),
+    kelapa3 = new Item("./img/kelapa.png", "Kelapa3", true, 2, 10),
     kelapa4 = new Item("./img/kelapa.png", "Kelapa4", true, 2, 10);
 
 // Masukkan barang dalam inventory
@@ -442,7 +410,7 @@ function drawCharacters() {
 function movements() {
     'use strict';
     // If aligned to grid
-    if (boxman.getX() % 32 === 0 && boxman.getY() % 32 === 0) {
+    if (!((boxman.getX() + boxman.getY()) % grid)) {
         aligned = true;
         
         if ((arrowkey & 8) === 8) {
