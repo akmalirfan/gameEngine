@@ -1,6 +1,6 @@
 // TO-DO: Jadikan resolution 240x160 (GBA)
 
-var interval = 1000 / 60,
+let interval = 1000 / 60,
     tile = new Image(),
     tile2 = new Image(),
     bubble = new Image(),
@@ -159,15 +159,13 @@ let Character = function(img_src, txtID) {
 
 // Item constructor
 function Item(img_src, name, stackable, textID, price) {
-    'use strict';
     this.sprite = new Image();
     this.sprite.src = img_src;
     this.name = name;
     this.stackable = stackable;
     this.textID = textID;
     this.price = price;
-    this.describe = function() {
-        'use strict';
+    this.describe = () => {
         var desc_length = text[3][0][this.textID].length;
         
         for (var i = 0; i < this.name.length; i++) {
@@ -224,8 +222,7 @@ var tangga = new Item("./img/tangga.png", "Tangga", false, 0, 20),
     kelapa4 = new Item("./img/kelapa.png", "Kelapa4", true, 2, 10);
 
 // Masukkan barang dalam inventory
-function masuk(item) {
-    'use strict';
+const masuk = (item) => {
     var i,
         inv_arrLength = inv_arr.length,
         had = false,
@@ -255,14 +252,15 @@ var entArray = [
     // NPCs
     monstak = new Character("./img/monsta.png", 0),
     boxbiru = new Character("./img/npc_biru.png", 1),
-    //kk = new Character("./img/kk.png", 2),
-    kk = new Character("./img/kk2.png", 2),
+    kk = new Character("./img/kk.png", 2),
+    //kk = new Character("./img/kk2.png", 2),
     
     // Objects
     crate = new Character("./img/crate.png", null)
 ];
 
-kk.setH(48);
+// Default value is 32
+//kk.setH(48);
 
 // Sama macam entArray cuma takde boxman
 var entArray2 = entArray.slice(1);
@@ -308,10 +306,13 @@ tileNo = [
     ]
 ];
 
+let leftside = initWidth / 2 - tileWidth / 2;
+let sceneWidth;
+let topside = initHeight / 2 - tileHeight / 2;
+let sceneHeight;
+
 // Function untuk pilih scene
-function initScene(scene) {
-    'use strict';
-    
+const initScene = (scene) => {
     currentScene = scene;
     
     enpisi = undefined;
@@ -364,8 +365,7 @@ function initScene(scene) {
 }
 
 // Function untuk lukis tiles
-function drawTiles(row, column, scene, layer, tileset) {
-    'use strict';
+const drawTiles = (row, column, scene, layer, tileset) => {
     for (var i = column, tileNo0_l = tileNo[scene][layer][0].length; i < tileNo0_l; i++) {
         for (var j = row, tileNo_l = tileNo[scene][layer].length; j < tileNo_l; j++) {
             if (tileNo[scene][layer][j][i] !== 0) // if 0, do nothing
@@ -384,8 +384,7 @@ function drawTiles(row, column, scene, layer, tileset) {
 }
 
 // Function untuk draw watak ikut depth
-function drawCharacters() {
-    'use strict';
+const drawCharacters = () => {
     var entArray_length = entArray.length;
 
     // Susun entities ikut depth
@@ -407,8 +406,7 @@ function drawCharacters() {
     }
 }
 
-function movements() {
-    'use strict';
+const movements = () => {
     // If aligned to grid
     if (!((boxman.getX() + boxman.getY()) % grid)) {
         aligned = true;
@@ -452,9 +450,7 @@ function movements() {
 }
 
 // Guna semasa dalam menu
-function navigate() {
-    'use strict';
-
+const navigate = () => {
     if (boleh_tekan) {
         if ((arrowkey & 2) === 2) {
             row = (row === 0) ? 4 : row - 1;
@@ -481,9 +477,7 @@ function navigate() {
 }
 
 // Gerakkan boxman dan crate
-function motion() {
-    'use strict';
-    
+const motion = () => {
     if (boxman.getHSpeed() > 0 && (collision & 4) !== 4) {
         if (crate.getX() === boxman.getX() + 32 && crate.getY() === boxman.getY()) {
             if ((collision & 64) !== 64) {
@@ -524,9 +518,7 @@ function motion() {
 }
 
 //Animasi untuk boxman
-function boxmanAnimate(box_x, box_y) {
-    'use strict';
-    
+const boxmanAnimate = (box_x, box_y) => {
     // Kalau kedudukan berubah
     if (box_x !== boxman.getX()) {
         boxman.frame_column = 0;
@@ -543,8 +535,7 @@ function boxmanAnimate(box_x, box_y) {
     }
 }
 
-function collisionCheck(box_x, box_y) {
-    'use strict';
+const collisionCheck = (box_x, box_y) => {
     var entArray2_length = entArray2.length;
     for (var ent = 0; ent < entArray2_length; ent++) {
         // Uji jarak boleh bercakap
@@ -594,7 +585,7 @@ function collisionCheck(box_x, box_y) {
     }
 }
 
-function customCollision() {
+const customCollision = () => {
     // Rumah, dinding atas / bawah
     if (boxman.getX() >= 448 && boxman.getX() <= 576) {
         if (boxman.getY() === 64) {
@@ -682,7 +673,7 @@ function customCollision() {
     }
 }
 
-function drawTextbox(player, NPC, ygbercakap_x, ygbercakap_y, text_width) {
+const drawTextbox = (player, NPC, ygbercakap_x, ygbercakap_y, text_width) => {
     var x1, y1, x2, y2;
     var extrabaris = text[NPC.textID][NPC.text][NPC.tukar].length > 21 ? 0 : 11;
     var bubbleheight = 44 - extrabaris;
@@ -740,7 +731,7 @@ function drawTextbox(player, NPC, ygbercakap_x, ygbercakap_y, text_width) {
 }
 
 // Simpan koordinat X pada source image
-function textToBekas(bekasIndex, text) {
+const textToBekas = (bekasIndex, text) => {
     'use strict';
     var text_length = text.length;
     
@@ -750,7 +741,7 @@ function textToBekas(bekasIndex, text) {
 }
 
 // LUKIS TEXTBOX + 'TULIS' ////////////////
-function tulis(text, player, NPC) {
+const tulis = (text, player, NPC) => {
     'use strict';
     sdgcakap = (NPC.tukar !== -1);
     
@@ -903,9 +894,7 @@ function tulis(text, player, NPC) {
     }*/
 }
 
-function gameLoop() {
-    'use strict';
-
+const gameLoop = () => {
     setTimeout(function() {
         window.requestAnimationFrame(gameLoop);
     }, interval);
@@ -922,9 +911,7 @@ function gameLoop() {
     }
 }
 
-function scene0() {
-    'use strict';
-    
+const scene0 = () => {
     collision &= 0;
     
     drawTiles(0, 0, currentScene, 0, tile);
@@ -969,13 +956,16 @@ function scene0() {
         boxmanAnimate(box_x, box_y);
         
         // KAMERA ////////////////////////////
-        if (boxman.getX() >= 160 && boxman.getX() <= 576) { // 160 = 352/2 - 16
-            bezaX = boxman.getX()-vx - 160;
+        sceneWidth = tileNo[currentScene][0][0].length * tileWidth;
+        sceneHeight = tileNo[currentScene][0].length * tileHeight;
+        
+        if (boxman.getX() >= leftside && boxman.getX() <= sceneWidth - initWidth / 2 - tileWidth / 2) {
+            bezaX = boxman.getX()-vx - leftside;
             vx += bezaX;
         }
         
-        if (boxman.getY() >= 96 && boxman.getY() <= 480) {
-            bezaY = boxman.getY()-vy - 96;
+        if (boxman.getY() >= topside && boxman.getY() <= sceneHeight - initHeight / 2 - tileHeight / 2) {
+            bezaY = boxman.getY()-vy - topside;
             vy += bezaY;
         }
     } else {
@@ -988,9 +978,7 @@ function scene0() {
     }
 } //scene0
 
-function inventory() {
-    'use strict';
-    
+const inventory = () => {
     // Nanti tukar guna unit relative supaya
     // jadi responsive
     ctx.fillStyle = '#808080';
@@ -1063,9 +1051,7 @@ function inventory() {
     }
 } //inventory
 
-function converse() {
-    "use strict";
-
+const converse = () => {
     if (currentScene !== 5 && enpisi !== undefined && enpisi.can_interact
         && dahlepas_space && var_panjang[1] === panjang_teks) {
         // Kosongkan var_panjang
@@ -1091,7 +1077,7 @@ function converse() {
     }
 }
 
-document.addEventListener('keydown', function (event) {
+document.addEventListener('keydown', (event) => {
     switch (event.keyCode) {
         case 32:
             space = true;
@@ -1117,7 +1103,7 @@ document.addEventListener('keydown', function (event) {
     }
 });
 
-document.addEventListener('keyup', function (event) {
+document.addEventListener('keyup', (event) => {
     switch (event.keyCode) {
         case 32:
             space = false;
@@ -1142,7 +1128,7 @@ document.addEventListener('keyup', function (event) {
     }
 });
 
-function resizeCanvas() {
+const resizeCanvas = () => {
     if (window.innerHeight < window.innerWidth) {
         scale = Math.floor(window.innerHeight / initHeight);
     } else {
